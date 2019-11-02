@@ -1,5 +1,7 @@
 \example
-
+\.vscode
+tutorial
+\bin
 
 # Prerequisites
 *.d
