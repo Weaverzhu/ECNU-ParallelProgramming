@@ -21,7 +21,7 @@ int main(int argc, char const *argv[])
 
     // -------------------------------------
 
-    int num_per_proc = atoi(argv[1]), num_total_proc = world_size;
+    int num_per_proc = atoi(argv[1]), num_total_proc = atoi(argv[2]);
     int *arr = malloc(sizeof(int) * num_per_proc), local_sum = 0, global_sum;
     for (int i=0; i<num_per_proc; ++i) {
         arr[i] = num_per_proc * world_rank + i;
@@ -33,14 +33,10 @@ int main(int argc, char const *argv[])
         for (int j=i; j<num_total_proc; j+=i) {
             if (world_rank == j) {
                 int target = j - i;
-                
-                printf("Send int from %d to %d\n", world_rank, target);
                 MPI_Send(&global_sum, 1, MPI_INT, target, 0, MPI_COMM_WORLD);
             } else if (world_rank == j-i) {
                 int target = i, rec;
-        
-                printf("Recv int from %d to %d\n", target, world_rank);
-                MPI_Recv(&rec, 1, MPI_INT, target, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&rec, 1, MPI_INT, target, 0, MPI_INT, MPI_STATUS_IGNORE);
                 global_sum += rec;
             }
         }
