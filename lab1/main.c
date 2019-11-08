@@ -17,22 +17,22 @@ void handlemsg(int tag, int num, int world_rank, int count) {
             memset(buf, 'a', num);
             MPI_Send(buf, num, MPI_CHAR, world_rank ^ 1, 0, MPI_COMM_WORLD);
 
-            printf("Process %d send at %d\n", world_rank, count);
+            if (outputflag) printf("Process %d send at %d\n", world_rank, count);
         } else {
             MPI_Recv(buf, num, MPI_CHAR, world_rank ^ 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             
-            printf("Process %d recv at %d\n", world_rank, count);
+            if (outputflag) printf("Process %d recv at %d\n", world_rank, count);
         }
     } else {
         if (!tag) {
             memset(buf, 'a', num);
             MPI_Send(buf, num, MPI_CHAR, world_rank ^ 1, 0, MPI_COMM_WORLD);
 
-            printf("Process %d send at %d\n", world_rank, count);
+            if (outputflag) printf("Process %d send at %d\n", world_rank, count);
         } else {
             MPI_Recv(buf, num, MPI_CHAR, world_rank ^ 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             
-            printf("Process %d recv at %d\n", world_rank, count);
+            if (outputflag) printf("Process %d recv at %d\n", world_rank, count);
         }
     }
 }
