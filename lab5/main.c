@@ -56,7 +56,7 @@ void Count_sort_parallel(int a[], const int n, int thread_count) {
     
     free(temp);
 }
-
+ 
 void doit(int thread_count) {
     int sum = 0;
     const int n = 1000000000;
@@ -80,7 +80,7 @@ int main(int argc, char const *argv[])
     for (int i=0; i<n; ++i) t[i] = rand();   
     for (int i=1; i<=8; ++i)
         Count_sort_parallel(t, n, i);
-
+    Count_sort(t, n);
     return 0;
 }
 
