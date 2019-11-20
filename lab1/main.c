@@ -37,6 +37,13 @@ void handlemsg(int tag, int num, int world_rank, int count) {
     }
 }
 
+void go(int pingpongcnt, int datalen, int world_rank) {
+    for (int i=0; i<pingpongcnt << 1; ++i) {
+        // printf("%d\n", i);
+        handlemsg((i&1)^1, datalen, world_rank, i);
+    }
+}
+
 int main(int argc, char **argv)
 {
     MPI_Init(&argc, &argv);
@@ -45,18 +52,11 @@ int main(int argc, char **argv)
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    int pingpongcnt = atoi(argv[1]) << 1, targetrank = world_rank ^ 1, datalen = atoi(argv[2]);
-    outputflag = 0;
-    if (pingpongcnt <= 200) outputflag = 1;
+    int targetrank = world_rank ^ 1, datalen = atoi(argv[1]);
     // -------------------------------------
 
-    int i;
-
-    printf("%d %d\n", pingpongcnt, datalen);
-
-    for (i=0; i<pingpongcnt; ++i) {
-        // printf("%d\n", i);
-        handlemsg((i&1)^1, datalen, world_rank, i);
+    for (int pingpongcnt = 0; pingpongcnt < 1000000; pingpongcnt *= 10) {
+        go(pingpongcnt, datalen, world_rank);
     }
 
     // -------------------------------------
