@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define N (1<<20)
 
@@ -55,8 +56,25 @@ int main(int argc, char **argv)
     int targetrank = world_rank ^ 1, datalen = atoi(argv[1]);
     // -------------------------------------
 
-    for (int pingpongcnt = 0; pingpongcnt < 1000000; pingpongcnt *= 10) {
+    for (int pingpongcnt = 1; pingpongcnt <= 100000; pingpongcnt *= 10) {
+         struct timespec st, ed;
+        double timediff;
+        clock_gettime(CLOCK_MONOTONIC, &st);
         go(pingpongcnt, datalen, world_rank);
+        clock_gettime(CLOCK_MONOTONIC, &ed);
+        timediff = ed.tv_sec - st.tv_sec + (ed.tv_nsec - st.tv_nsec) / 1000000000.0;
+        printf("Pingpong %d, datalen=%d, Time used: %.5lf\n", pingpongcnt, datalen, timediff);
+    }
+
+    int pingpongcnt = 100;
+    for (datalen=1; datalen<=16384; datalen<<=1) {
+         struct timespec st, ed;
+        double timediff;
+        clock_gettime(CLOCK_MONOTONIC, &st);
+        go(pingpongcnt, datalen, world_rank);
+        clock_gettime(CLOCK_MONOTONIC, &ed);
+        timediff = ed.tv_sec - st.tv_sec + (ed.tv_nsec - st.tv_nsec) / 1000000000.0;
+        printf("Pingpong %d, datalen=%d, Time used: %.5lf\n", pingpongcnt, datalen, timediff);
     }
 
     // -------------------------------------
