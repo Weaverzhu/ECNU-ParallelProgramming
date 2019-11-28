@@ -12,7 +12,7 @@ char buf[N];
 void handlemsg(int tag, int num, int world_rank, int count) {
     // printf("%d\n", world_rank);
     int dest = world_rank ^ 1;
-    printf("%d\n", dest);
+    // printf("%d\n", dest);
     if (world_rank == 0) {
         if (tag) {
             memset(buf, 'a', num);
@@ -53,28 +53,28 @@ int main(int argc, char **argv)
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    int targetrank = world_rank ^ 1, datalen = atoi(argv[1]);
+    int targetrank = world_rank ^ 1, datalen = 1024;
     // -------------------------------------
 
-    for (int pingpongcnt = 1; pingpongcnt <= 100000; pingpongcnt *= 10) {
-         struct timespec st, ed;
+    for (int pingpongcnt = 1; pingpongcnt <= 10000000; pingpongcnt *= 10) {
+        struct timespec st, ed;
         double timediff;
         clock_gettime(CLOCK_MONOTONIC, &st);
         go(pingpongcnt, datalen, world_rank);
         clock_gettime(CLOCK_MONOTONIC, &ed);
         timediff = ed.tv_sec - st.tv_sec + (ed.tv_nsec - st.tv_nsec) / 1000000000.0;
-        printf("Pingpong %d, datalen=%d, Time used: %.5lf\n", pingpongcnt, datalen, timediff);
+        if (world_rank == 0) printf("Pingpong %d, datalen=%d, Time used: %.5lf\n", pingpongcnt, datalen, timediff);
     }
-
-    int pingpongcnt = 100;
+    
+    int pingpongcnt = 10000;
     for (datalen=1; datalen<=16384; datalen<<=1) {
-         struct timespec st, ed;
+        struct timespec st, ed;
         double timediff;
         clock_gettime(CLOCK_MONOTONIC, &st);
         go(pingpongcnt, datalen, world_rank);
         clock_gettime(CLOCK_MONOTONIC, &ed);
         timediff = ed.tv_sec - st.tv_sec + (ed.tv_nsec - st.tv_nsec) / 1000000000.0;
-        printf("Pingpong %d, datalen=%d, Time used: %.5lf\n", pingpongcnt, datalen, timediff);
+        if (world_rank == 0) printf("Pingpong %d, datalen=%d, Time used: %.5lf\n", pingpongcnt, datalen, timediff);
     }
 
     // -------------------------------------
