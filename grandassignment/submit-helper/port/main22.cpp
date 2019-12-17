@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <assert.h>
 const int N = 5000;
+
+#define double long double
+
 double **a, **b, **c;
 
 
@@ -15,9 +18,9 @@ int main(int argc, char const *argv[])
 	a = (double**)malloc(sizeof(double*) * an);
 	for (int i=0; i<an; ++i) {
 		a[i] = (double*)malloc(sizeof(double) * am);
-		scanf("%lf", &a[i][0]);
+		scanf("%Lf", &a[i][0]);
 		for (int j=1; j<am; ++j) {
-			scanf(",%lf", &a[i][j]);
+			scanf(",%Lf", &a[i][j]);
 		}
 	}
 
@@ -25,9 +28,9 @@ int main(int argc, char const *argv[])
 	b = (double**)malloc(sizeof(double*) * bn);
 	for (int i=0; i<bn; ++i) {
 		b[i] = (double*)malloc(sizeof(double) * bm);
-		scanf("%lf", &b[i][0]);
+		scanf("%Lf", &b[i][0]);
 		for (int j=1; j<bm; ++j) {
-			scanf(",%lf", &b[i][j]);
+			scanf(",%Lf", &b[i][j]);
 		}
 	}
 	assert(am == bn);
@@ -36,7 +39,8 @@ int main(int argc, char const *argv[])
 		c[i] = (double*)malloc(sizeof(double) * bm);
 		for (int j=0; j<bm; ++j) {
 			c[i][j] = 0;
-			for (int k=0; k<am; ++k) c[i][j] += a[i][k] * b[k][j];
+			// for (int k=0; k<am; ++k) c[i][j] += a[i][k] * b[k][j];
+			for (int k=am-1; k>=0; --k) c[i][j] += a[i][k] * b[k][j];
 		}
 	}
 	

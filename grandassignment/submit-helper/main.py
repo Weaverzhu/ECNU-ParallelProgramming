@@ -43,5 +43,6 @@ newname = newname
 namelist.append(newname)
 savePastNames(namelist)
 
+os.system("del /q port")
 os.system("type {} > {}".format(argv[1], "./port/" + newname + ".cpp"))
 
