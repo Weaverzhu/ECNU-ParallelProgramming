@@ -32,10 +32,11 @@ def tryNewName(name, namelist):
 
 namelist = loadPastNames()
 
-if argv.__len__() != 2:
-    print("Usage: python main.py {path}")
+if argv.__len__() != 3:
+    print("Usage: python main.py {path} {associative}")
 
 p = argv[1].split('\\')
+ass = argv[2]
 filename = p[-1].split('.')[0]
 newname = tryNewName(filename, namelist)
 print("newname={}".format(newname))
@@ -43,6 +44,6 @@ newname = newname
 namelist.append(newname)
 savePastNames(namelist)
 
-os.system("del /q port")
-os.system("type {} > {}".format(argv[1], "./port/" + newname + ".cpp"))
+# os.system("del /q port")
+os.system("type {} > {}".format(argv[1], "./port/" + newname + ass))
 

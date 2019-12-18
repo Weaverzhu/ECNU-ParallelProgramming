@@ -3,3 +3,9 @@ main2
 main20
 main21
 main22
+cuda0
+cuda1
+cuda2
+cuda3
+cuda4
+cuda5
