@@ -11,3 +11,4 @@ cuda4
 cuda5
 cudareadonly0
 cuda6
+cudareadonly1

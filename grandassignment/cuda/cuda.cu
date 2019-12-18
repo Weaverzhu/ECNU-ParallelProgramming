@@ -8,7 +8,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-#include <device_functions.h>
+// #include <device_functions.h>
 #include <cuda_runtime_api.h>
 
 using namespace std;
@@ -246,9 +246,9 @@ int main()
     }
     // B.readtrans();
 
-    // outputMatrix(h_a, an, am);
-    // outputMatrix(h_b, bn, bm);
-    // exit(0);
+    outputMatrix(h_a, an, am);
+    outputMatrix(h_b, bn, bm);
+    exit(0);
 
     int block_size = 16;
     dim3 threads(block_size, block_size);

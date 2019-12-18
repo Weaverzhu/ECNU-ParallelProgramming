@@ -3,8 +3,12 @@
 tutorial
 \bin
 *std*
+cuda.txt
+bf.txt
 NOTE.md
 \test
+output.txt
+input.txt
 # Prerequisites
 *.d
 
