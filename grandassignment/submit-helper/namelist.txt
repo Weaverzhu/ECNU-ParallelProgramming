@@ -9,3 +9,5 @@ cuda2
 cuda3
 cuda4
 cuda5
+cudareadonly0
+cuda6
