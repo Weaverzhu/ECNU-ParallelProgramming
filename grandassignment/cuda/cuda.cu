@@ -246,9 +246,9 @@ int main()
     }
     // B.readtrans();
 
-    outputMatrix(h_a, an, am);
-    outputMatrix(h_b, bn, bm);
-    exit(0);
+    // outputMatrix(h_a, an, am);
+    // outputMatrix(h_b, bn, bm);
+    // exit(0);
 
     int block_size = 16;
     dim3 threads(block_size, block_size);
@@ -256,8 +256,8 @@ int main()
     n = an;
     m = bm;
 
-    // fprintf(stderr, "grid= %d,%d,%d threads= %d,%d,%d\n", grid.x, grid.y, grid.z, threads.x, threads.y, threads.z);
-
+    fprintf(stderr, "grid= %d,%d,%d threads= %d,%d,%d\n", grid.x, grid.y, grid.z, threads.x, threads.y, threads.z);
+    // exit(0);
     // read into main memory
     copyMatrix(h_a, d_a, an, am);
     copyMatrix(h_b, d_b, bn, bm);
@@ -265,10 +265,7 @@ int main()
 
     // puts("entering danger");
     matrixMult<<<threads, grid>>>(d_a, d_b, d_c, an, bm, am);
-    // if (cudaGetLastError() != cudaSuccess) {
-    //     cerr << "failed in matrixMult" << endl;
-    //     exit(0);
-    // } else cerr << "looks good in matrixMult" << endl;
+    handleCudaError(cudaGetLastError(), "running kernel");
     // puts("FUCK");
     // ld *c = copyMatrixBack(d_c, n, m);
     h_c = (ld*)malloc(sizeof(ld) * n * m);
@@ -276,7 +273,7 @@ int main()
 
 
     handleCudaError(cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost), "memcpy back");
-    
+    // printf("%d %d\n", n, m);
     outputMatrix(h_c, n, m);
     // output::flush();
     
