@@ -10,8 +10,8 @@ brutalforcesource = ".\\baoli\\main2.cpp"
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
 
-msize = [500, 560]
-ele_range = [0, 5000]
+msize = [1000, 1100]
+ele_range = [0, 500]
 # ======================================
 
 def randomfloat(l, r):
@@ -19,14 +19,20 @@ def randomfloat(l, r):
 
 
 def randomMatrixStr(n, m, L=0, R=1000000):
-    res = ""
-    res = res + "{},{}\n".format(n, m)
+    print("log: random Matrix prepare started")
+    bucket = []
+    bucket.append("{},{}\n".format(n, m))
     for i in range(n):
-        res = res + "{:.3f}".format(randomfloat(L,R))
+        if (i % 500 == 0):
+            print("log: processing {}th row".format(i))
+        bucket.append("{:.3f}".format(randomfloat(L,R)))
         for j in range(1,m):
-            res = res + ",{:.3f}".format(randomfloat(L,R))
-        res = res + "\n"
-
+            bucket.append(",{:.3f}".format(randomfloat(L,R)))
+            # res = res + ",{:.3f}".format(randomfloat(L,R))
+        # res = res + "\n"
+        bucket.append("\n")
+    res = "".join(bucket)
+    print("log: random Matrix prepare completed")
     return res
 
 class Runner:
@@ -70,6 +76,6 @@ f.close()
 # os.system("xcopy ./output.txt ./judger/bf.txt")
 
 cuda.go()
-brutalforce.go()
+# brutalforce.go()
 
-cuda.diff(brutalforce)
+# cuda.diff(brutalforce)

@@ -263,6 +263,8 @@ int main()
     copyMatrix(h_b, d_b, bn, bm);
     handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");
 
+
+    
     // puts("entering danger");
     matrixMult<<<threads, grid>>>(d_a, d_b, d_c, an, bm, am);
     // if (cudaGetLastError() != cudaSuccess) {

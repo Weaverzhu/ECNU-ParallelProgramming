@@ -8,7 +8,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-// #include <device_functions.h>
+#include <device_functions.h>
 #include <cuda_runtime_api.h>
 
 using namespace std;
@@ -156,6 +156,8 @@ inline void handleCudaError(cudaError_t err, string name = "fuck") {
     if (err != cudaSuccess) {
         cerr << name << endl;
         cerr << cudaGetErrorString(err) << endl;
+        cerr << cudaGetErrorName(err) << endl;
+        // cudapeek
         exit(0);
     }
 }
@@ -222,6 +224,17 @@ int main()
     // #ifndef Weaverzhu
     freopen("input.txt", "r", stdin);
 	freopen("output.txt", "w", stdout);
+
+
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, 0);
+    cerr << prop.name << endl;
+    // cerr << prop.maxGridSize[0] << ' ' << prop.maxGridSize[1] << ' ' << prop.maxGridSize[2] << endl;
+    // cerr << prop.maxThreadsPerMultiProcessor << endl;
+
+    // exit(0);
+
+
     // #endif
     // io >> an >> am;
     scanf("%d,%d", &an, &am);
@@ -250,6 +263,7 @@ int main()
     // outputMatrix(h_b, bn, bm);
     // exit(0);
 
+    // int block_size = round(sqrt(prop.maxThreadsPerMultiProcessor));
     int block_size = 16;
     dim3 threads(block_size, block_size);
     dim3 grid((an + threads.x - 1) / threads.x, (bm + threads.y - 1) / threads.y);
@@ -264,8 +278,10 @@ int main()
     handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");
 
     // puts("entering danger");
-    matrixMult<<<threads, grid>>>(d_a, d_b, d_c, an, bm, am);
-    handleCudaError(cudaGetLastError(), "running kernel");
+
+    handleCudaError(cudaGetLastError(), "check before running error");
+    matrixMult<<<threads, grid, 0>>>(d_a, d_b, d_c, an, bm, am);
+    handleCudaError(cudaGetLastError(), "check after kernel");
     // puts("FUCK");
     // ld *c = copyMatrixBack(d_c, n, m);
     h_c = (ld*)malloc(sizeof(ld) * n * m);
