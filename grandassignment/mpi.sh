@@ -1,0 +1,1 @@
+mpicc $1 -std=c99 -O3
