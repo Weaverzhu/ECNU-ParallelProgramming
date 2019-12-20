@@ -247,10 +247,6 @@ inline void print(double x, char ch = ' ')
 
 int main(int argc, char const *argv[])
 {
-    // freopen("input.txt", "r", stdin);
-    // freopen("output.txt", "w", stdout);
-
-    // cerr << "fuck" << endl;
 
     int an, am, bn, bm;
     // scanf("%d,%d", &an, &am);

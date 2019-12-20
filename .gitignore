@@ -8,7 +8,7 @@ bf.txt
 NOTE.md
 \test
 output.txt
-input.txt
+input*.txt
 # Prerequisites
 *.d
 

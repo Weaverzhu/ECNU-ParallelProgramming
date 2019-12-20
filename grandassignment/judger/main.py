@@ -1,6 +1,5 @@
 from random import randint, random
-import os
-
+import os, math
 
 # ============= config =================
 outputFile = ".\\input.txt"
@@ -10,8 +9,12 @@ brutalforcesource = ".\\baoli\\main2.cpp"
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
 
-msize = [1000, 1100]
-ele_range = [0, 500]
+msize = [100, 500]
+ele_range = [0,10000]
+
+
+gendata = False
+# gendata = True
 # ======================================
 
 def randomfloat(l, r):
@@ -27,9 +30,12 @@ def randomMatrixStr(n, m, L=0, R=1000000):
             print("log: processing {}th row".format(i))
         bucket.append("{:.3f}".format(randomfloat(L,R)))
         for j in range(1,m):
-            bucket.append(",{:.3f}".format(randomfloat(L,R)))
-            # res = res + ",{:.3f}".format(randomfloat(L,R))
-        # res = res + "\n"
+            if randint(0, 1) == 1:
+                bucket.append(",{:.3f}".format(randomfloat(L,R)))
+            else:
+                bucket.append(",{:.3f}".format(randomfloat(0, 1)))
+        j = 1
+
         bucket.append("\n")
     res = "".join(bucket)
     print("log: random Matrix prepare completed")
@@ -61,21 +67,28 @@ n = randint(msize[0], msize[1])
 m = randint(msize[0], msize[1])
 k = randint(msize[0], msize[1])
 
+# n = 1
+# m = 7000
+# k = 1
+
 cuda = Runner(cudasource, "cuda", cudarun)
 brutalforce = Runner(brutalforcesource, "bf", brutalforcerun)
 
-f = open(outputFile, "w")
-f.write(randomMatrixStr(n, m, ele_range[0], ele_range[1]))
-f.write(randomMatrixStr(m, k, ele_range[0], ele_range[1]))
-f.close()
-
-# os.system("{} {}".format(cudarun, cudasource))
-# os.system("xcopy ./output.txt ./judger/cuda.txt")
-
-# os.system("{} {}".format(brutalforcerun, brutalforcesource))
-# os.system("xcopy ./output.txt ./judger/bf.txt")
+if gendata:
+    f = open(outputFile, "w")
+    f.write(randomMatrixStr(n, m, ele_range[0], ele_range[1]))
+    f.write(randomMatrixStr(m, k, ele_range[0], ele_range[1]))
+    f.close()
 
 cuda.go()
 # brutalforce.go()
 
 # cuda.diff(brutalforce)
+# f1 = open(cuda.outputfile, "r")
+# f2 = open(brutalforce.outputfile, "r")
+
+# ans1 = float(f1.read())
+# ans2 = float(f2.read())
+
+# print(ans1, ans2)
+# print(math.fabs(1 - ans1 / ans2))
