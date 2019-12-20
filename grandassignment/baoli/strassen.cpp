@@ -2,9 +2,11 @@
 using namespace std;
 using LL = long long;
 
+typedef int T;
+
 
 struct Matrix {
-	vector< vector<int> > a;
+	vector< vector<T> > a;
 	Matrix(int n, int m) {
 		a.resize(n);
 		for (int i=0; i<n; ++i)
@@ -86,7 +88,6 @@ Matrix strassen(Matrix aa, Matrix bb) {
 	bb.padwithzero(nn);
 	dump(aa, a);
 	dump(bb, b);
-	doit();
 }
 
 }
