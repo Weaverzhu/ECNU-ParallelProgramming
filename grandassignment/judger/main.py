@@ -3,14 +3,14 @@ import os, math
 
 # ============= config =================
 outputFile = ".\\input.txt"
-cudasource = ".\\cuda\\cuda.cu"
+cudasource = ".\\cuda\\cudanew.cu"
 brutalforcesource = ".\\baoli\\main.cpp"
 
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
 
-msize = [10, 50]
-ele_range = [1,1]
+msize = [1, 10]
+ele_range = [1,10]
 
 
 gendata = True
@@ -26,12 +26,12 @@ def randomMatrixStr(n, m, L=0, R=1000000):
     for i in range(n):
         if (i % 500 == 0):
             print("log: processing {}th row".format(i))
-        bucket.append("{:.3f}".format(randomfloat(1,1)))
+        bucket.append("{:.3f}".format(randomfloat(L,R)))
         for j in range(1,m):
             if randint(0, 1) == 1:
-                bucket.append(",{:.3f}".format(randomfloat(1,1)))
+                bucket.append(",{:.3f}".format(randomfloat(L,R)))
             else:
-                bucket.append(",{:.3f}".format(randomfloat(1,1)))
+                bucket.append(",{:.3f}".format(randomfloat(L,R)))
         
 
         bucket.append("\n")
@@ -104,10 +104,6 @@ n = randint(msize[0], msize[1])
 m = randint(msize[0], msize[1])
 k = randint(msize[0], msize[1])
 
-n = 500
-m = 5000
-k = 500
-
 cuda = Runner(cudasource, "cuda", cudarun)
 brutalforce = Runner(brutalforcesource, "bf", brutalforcerun)
 
@@ -121,19 +117,17 @@ cuda.go()
 
 
 
-# brutalforce.go()
+brutalforce.go()
 
-# # cuda.diff(brutalforce)
-# f1 = open(cuda.outputfile, "r")
-# f2 = open(brutalforce.outputfile, "r")
+# cuda.diff(brutalforce)
+f1 = open(cuda.outputfile, "r")
+f2 = open(brutalforce.outputfile, "r")
 
-# cudaAns = matrixcmp(f1.read())
-# bfAns = matrixcmp(f2.read())
+cudaAns = matrixcmp(f1.read())
+bfAns = matrixcmp(f2.read())
 
-# res = cudaAns.diff(bfAns)
+res = cudaAns.diff(bfAns)
 
-
-
-# f1.close()
-# f2.close()
+f1.close()
+f2.close()
 

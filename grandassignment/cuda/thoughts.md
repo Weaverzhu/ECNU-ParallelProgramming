@@ -6,8 +6,4 @@ $b = b^T$ 然后每行对应点乘
 
 使用异步内存转移 `cudaMemcpyAsync`
 
-使用 `cudaMemcpy2D ` 复制二维数组
-
-`cudaGetDeviceProperties` 获取 SM 数量
-
 `cudaOccupancyMaxPotentialBlockSize` 获取最佳的 `blocksize`

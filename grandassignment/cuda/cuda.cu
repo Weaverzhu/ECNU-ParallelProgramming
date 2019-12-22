@@ -166,22 +166,11 @@ int n, m;
 
 void copyMatrix(ld *&src,  ld *&dst, int n, int m) {
     int size = sizeof(ld) * n * m;
+    
     handleCudaError(cudaMalloc(&dst, size), "cudaMalloc in copyMatrix");
     handleCudaError(cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice), "memcpy in copyMatrix");
 
-    // handleCudaError(cudaMemcpy(src, dst, size, cudaMemcpyDeviceToHost), "check in copyMatrix");
-    // cerr << "end in copyMatrix" << endl;
 }
-
-// ld *copyMatrixBack(const ld *src, int n, int m) {
-//     ld *res;
-//     int size = sizeof(ld) * n * m;
-//     res = (ld*)malloc(size);
-//     cerr << "in copyMatrixBack: size=" << size << endl;
-//     handleCudaError(cudaMemcpy(res, src, size, cudaMemcpyDeviceToHost), "memcpy in copyMatrixBack");
-//     // memcpy(res.a, ptr, size);)
-//     return res;
-// }
 
 template<typename T>
 __global__ void matrixMult(T *d_a, T *d_b, T *d_c, int an, int bm, int am) {

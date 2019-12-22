@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
+#include <assert.h>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -11,12 +12,12 @@
 #include <device_functions.h>
 #include <cuda_runtime_api.h>
 
-// #include <omp.h>
-
 using namespace std;
 
 typedef double ld;
 typedef long long LL;
+
+const int max_shared_size = 128;
 
 namespace output {
     const int OutputBufferSize = 1e6+5;
@@ -158,8 +159,6 @@ inline void handleCudaError(cudaError_t err, string name = "fuck") {
     if (err != cudaSuccess) {
         cerr << name << endl;
         cerr << cudaGetErrorString(err) << endl;
-        cerr << cudaGetErrorName(err) << endl;
-        // cudapeek
         exit(0);
     }
 }
@@ -168,12 +167,13 @@ ld *d_a, *d_b, *d_c, *h_a, *h_b, *h_c;
 int an, am, bn, bm;
 int n, m;
 
-// void copyMatrix(ld **pdst, ld **psrc, int n, int m) {
-//     ld *dst = *pdst, *src = *psrc;
-//     int size = sizeof(ld) * n * m;
-//     handleCudaError(cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice), "memcpy in copyMatrix");
-// }
+void copyMatrix(ld *&src,  ld *&dst, int n, int m) {
+    int size = sizeof(ld) * n * m;
+    
+    handleCudaError(cudaMalloc(&dst, size), "cudaMalloc in copyMatrix");
+    handleCudaError(cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice), "memcpy in copyMatrix");
 
+}
 
 template<typename T>
 __global__ void matrixMult(T *d_a, T *d_b, T *d_c, int an, int bm, int am) {
@@ -189,97 +189,78 @@ __global__ void matrixMult(T *d_a, T *d_b, T *d_c, int an, int bm, int am) {
         d_c[i * bm + j] = sum;
 }
 
+__global__ void matrixMult2(ld *d_a, ld *d_b, ld *d_c, int an, int bn, int am) {
+    int index = blockDim.x * blockIdx.x + threadIdx.x;
+    int i = index / bn, j = index % bn;
+    if (i >= an || j >= bn) return;
+    ld sum = 0;
+    for (int k=0; k<am; ++k)
+        sum += d_a[i*am + k] * d_b[j*am+k];
+    d_c[i * bn + j] = sum;
+}
+
 void outputMatrix(ld *a, int n, int m) {
-    // output::print(n); output::print(',');
-    // output::print(m); output::print('\n');
     for (int i=0; i<n; ++i) {
         int base = i * m;
         output::print(a[base]);
-        // printf("%.2f", a[base]);
         for (int j=1; j<m; ++j) {
             output::print(',');
             output::print(a[base + j]);
-            // printf(",%.2f", a[base+j]);
         }
         output::print('\n');
-        // putchar('\n');
     }
 }
+
+void hostMatrixInput(ld **a, int &n, int &m, bool transpose = false) {
+    io >> n >> m;
+    *a = (ld*)malloc(sizeof(ld) * n * m);
+   
+    if (!transpose)
+        for (int i=0; i<n; ++i)
+        for (int j=0; j<m; ++j) {
+            io >> (*a)[i * m + j];
+        }
+    else {
+        for (int i=0; i<n; ++i)
+        for (int j=0; j<m; ++j) {
+            io >> (*a)[j * n + i];
+        }
+        swap(n, m);
+    }
+}
+
+
 
 int main()
 {
     // #ifndef Weaverzhu
-    // ld st = omp_get_wtime();
     freopen("input.txt", "r", stdin);
-	freopen("output.txt", "w", stdout);
-
+    freopen("output.txt", "w", stdout);
 
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, 0);
     cerr << prop.name << endl;
-
-    // scanf("%d,%d", &an, &am);
-    io >> an >> am;
-    // printf("%d %d\n", an, am); exit(0);
-    h_a = (ld*)malloc(sizeof(ld) * an * am);
-    for (int i=0; i<an; ++i) {
-        int base = i * am;
-        // scanf("%lf", &h_a[base]);
-        io >> h_a[base];
-        for (int j=1; j<am; ++j)
-            io >> h_a[base+j];
-            // scanf(",%lf", &h_a[base+j]);
-    }
-    
-    io >> bn >> bm;
-    // scanf("%d,%d", &bn, &bm);
-    // printf("%d %d\n", bn, bm); exit(0);
-    h_b = (ld*)malloc(sizeof(ld) * bn * bm);
-    for (int i=0; i<bn; ++i) {
-        int base = i * bm;
-        io >> h_b[base];
-        // scanf("%lf", &h_b[base]);
-        for (int j=1; j<bm; ++j)
-            io >> h_b[base+j];
-            // scanf(",%lf", &h_b[base+j]);
-    }
-
-    n = an; m = bm;
-    int size = sizeof(ld) * n * m,
-    sizea = sizeof(ld) * an * am,
-    sizeb = sizeof(ld) * bn * bm;
-
-    handleCudaError(cudaMalloc(&d_a, sizea), "alloc d_a");
-    handleCudaError(cudaMalloc(&d_b, sizeb), "alloc d_b");
-    handleCudaError(cudaMalloc(&d_c, size), "alloc d_c");
-    handleCudaError(cudaMemcpy(d_a, h_a, sizea, cudaMemcpyHostToDevice), "memcpy h_a to d_a");
-    handleCudaError(cudaMemcpy(d_b, h_b, sizeb, cudaMemcpyHostToDevice), "memcpy h_b to d_b");
+    hostMatrixInput(&h_a, an, am);
+    hostMatrixInput(&h_b, bn, bm, true);
 
 
+    n = an;
+    m = bn;
+    int block_size = prop.maxThreadsPerBlock, grids = (n * m + block_size - 1) / block_size;
+    copyMatrix(h_a, d_a, an, am);
+    copyMatrix(h_b, d_b, bn, bm);
+    handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");
+    // cerr << an << ' ' << am << ' ' << bn << ' ' << bm << ' ' << endl;
+    matrixMult2<<<grids, block_size>>>(d_a, d_b, d_c, an, bn, am);
+    h_c = (ld*)malloc(sizeof(ld) * n * m);
+    int size = sizeof(ld) * n * m;
 
-    handleCudaError(cudaMemcpy(h_a, d_a, sizeof(ld) * an * am, cudaMemcpyDeviceToHost), "test memcpy back");
-    // outputMatrix(h_a, an, am);
-
-    
-    
-    // int block_size = prop.maxThreadsPerBlock,
-    int block_size = 256,
-     grids = (an * bm + block_size-1) / block_size;
-    // ld cst = omp_get_wtime();
-    handleCudaError(cudaGetLastError(), "check before running error");
-    matrixMult<<<grids, block_size>>>(d_a, d_b, d_c, an, bm, am);
-    handleCudaError(cudaGetLastError(), "check after kernel");
-    // ld ced = omp_get_wtime();
-    h_c = (ld*)malloc(size);
-    
 
     handleCudaError(cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost), "memcpy back");
     
     outputMatrix(h_c, n, m);
     output::flush();
     
-    // cerr << "Time used: " << omp_get_wtime() - st << endl;
-    // cerr << "calc Time used: " << ced - cst << endl;
     return 0;
 }
 
