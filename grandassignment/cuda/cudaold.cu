@@ -185,8 +185,8 @@ void copyMatrix(ld *&src,  ld *&dst, int n, int m) {
 
 template<typename T>
 __global__ void matrixMult(T *d_a, T *d_b, T *d_c, int an, int bm, int am) {
-    int index = blockDim.x * blockIdx.x + threadIdx.x;
-    int i = index / bm, j = index % bm;
+    int i = blockDim.x * blockIdx.x + threadIdx.x,
+    j = blockDim.y * blockIdx.y + threadIdx.y;
     if (i >= an || j >= bm) return;
     ld sum = 0;
     if (i < an && j < bm) {
@@ -219,10 +219,6 @@ int main()
     // #ifndef Weaverzhu
     freopen("input.txt", "r", stdin);
     freopen("output.txt", "w", stdout);
-
-    cudaDeviceProp prop;
-    cudaGetDeviceProperties(&prop, 0);
-    cerr << prop.name << endl;
     // #endif
     io >> an >> am; h_a = (ld*)malloc(sizeof(ld) * an * am);
     for (int i=0; i<an; ++i)
@@ -238,15 +234,27 @@ int main()
     // outputMatrix(h_a, an, am);
     // outputMatrix(h_b, bn, bm);
 
-    
+    int block_size = 16;
+    dim3 threads(block_size, block_size);
+    dim3 grid((an + threads.x - 1) / threads.x, (bm + threads.y - 1) / threads.y);
     n = an;
     m = bm;
-    int block_size = prop.maxThreadsPerBlock, grids = (n * m + block_size - 1) / block_size;
+
+    // fprintf(stderr, "grid= %d,%d,%d threads= %d,%d,%d\n", grid.x, grid.y, grid.z, threads.x, threads.y, threads.z);
+
+    // read into main memory
     copyMatrix(h_a, d_a, an, am);
     copyMatrix(h_b, d_b, bn, bm);
     handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");
 
-    matrixMult<<<grids, block_size>>>(d_a, d_b, d_c, an, bm, am);
+    // puts("entering danger");
+    matrixMult<<<threads, grid>>>(d_a, d_b, d_c, an, bm, am);
+    // if (cudaGetLastError() != cudaSuccess) {
+    //     cerr << "failed in matrixMult" << endl;
+    //     exit(0);
+    // } else cerr << "looks good in matrixMult" << endl;
+    // puts("FUCK");
+    // ld *c = copyMatrixBack(d_c, n, m);
     h_c = (ld*)malloc(sizeof(ld) * n * m);
     int size = sizeof(ld) * n * m;
 

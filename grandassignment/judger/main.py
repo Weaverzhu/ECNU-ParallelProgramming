@@ -4,18 +4,16 @@ import os, math
 # ============= config =================
 outputFile = ".\\input.txt"
 cudasource = ".\\cuda\\cuda.cu"
-brutalforcesource = ".\\baoli\\main2.cpp"
+brutalforcesource = ".\\baoli\\main.cpp"
 
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
 
-msize = [100, 500]
-ele_range = [0,10000]
+msize = [10, 50]
+ele_range = [1,1]
 
 
-gendata = False
-# gendata = True
-# ======================================
+gendata = True
 
 def randomfloat(l, r):
     return random() * (r-l) + l
@@ -28,13 +26,13 @@ def randomMatrixStr(n, m, L=0, R=1000000):
     for i in range(n):
         if (i % 500 == 0):
             print("log: processing {}th row".format(i))
-        bucket.append("{:.3f}".format(randomfloat(L,R)))
+        bucket.append("{:.3f}".format(randomfloat(1,1)))
         for j in range(1,m):
             if randint(0, 1) == 1:
-                bucket.append(",{:.3f}".format(randomfloat(L,R)))
+                bucket.append(",{:.3f}".format(randomfloat(1,1)))
             else:
-                bucket.append(",{:.3f}".format(randomfloat(0, 1)))
-        j = 1
+                bucket.append(",{:.3f}".format(randomfloat(1,1)))
+        
 
         bucket.append("\n")
     res = "".join(bucket)
@@ -62,14 +60,53 @@ class Runner:
         os.system("fc {} {}".format(self.outputfile, otherRunner.outputfile))
         pass
 
+class matrixcmp:
+    def __init__(self, mstr = ""):
+        self.mstr = mstr
+        self.rows = self.mstr.split('\n')
+        self.a = [ [] for i in self.rows]
+        self.n = self.m = 0
+        self.n = self.rows.__len__() - 1
+        idx = 0
+        for row in self.rows:
+            if (row.__len__() == 0):
+                continue
+            tmps = row.split(',')
+            if (self.m == 0):
+                self.m = tmps.__len__()
+            elif self.m != tmps.__len__():
+                print("FUCK")
+                exit()
+            for floatstr in tmps:
+                self.a[idx].append(float(floatstr))
+            # print(self.a[idx].__len__())
+            idx = idx + 1
+    def diff(self, other, eps = 1e-9):
+        if self.n != other.n or self.m != other.m:
+            print("log: diff matrix size, n={}, m={}, other.n={}, other.m={}", self.n, self.m, other.n, other.m)
+            return True
+        for i in range(self.n):
+            for j in range(self.m):
+                # print(i, j)
+                f1 = self.a[i][j]
+                f2 = other.a[i][j]
+                
+                err_val = math.fabs((f1 - f2) / max([f2, 1]))
+                if err_val > eps:
+                    print("log: diff val: i={} j={} f1={} f2={}".format(i, j, f1, f2))
+                    return True
+        print("log: no diff err!, Accepted")
+        return False
 
+        pass
+        
 n = randint(msize[0], msize[1])
 m = randint(msize[0], msize[1])
 k = randint(msize[0], msize[1])
 
-# n = 1
-# m = 7000
-# k = 1
+n = 500
+m = 5000
+k = 500
 
 cuda = Runner(cudasource, "cuda", cudarun)
 brutalforce = Runner(brutalforcesource, "bf", brutalforcerun)
@@ -81,14 +118,22 @@ if gendata:
     f.close()
 
 cuda.go()
+
+
+
 # brutalforce.go()
 
-# cuda.diff(brutalforce)
+# # cuda.diff(brutalforce)
 # f1 = open(cuda.outputfile, "r")
 # f2 = open(brutalforce.outputfile, "r")
 
-# ans1 = float(f1.read())
-# ans2 = float(f2.read())
+# cudaAns = matrixcmp(f1.read())
+# bfAns = matrixcmp(f2.read())
 
-# print(ans1, ans2)
-# print(math.fabs(1 - ans1 / ans2))
+# res = cudaAns.diff(bfAns)
+
+
+
+# f1.close()
+# f2.close()
+

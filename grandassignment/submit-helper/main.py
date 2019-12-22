@@ -32,12 +32,14 @@ def tryNewName(name, namelist):
 
 namelist = loadPastNames()
 
-if argv.__len__() != 3:
-    print("Usage: python main.py {path} {associative}")
+if argv.__len__() != 2:
+    print("Usage: python main.py {path}")
 
 p = argv[1].split('\\')
-ass = argv[2]
+# ass = argv[2]
 filename = p[-1].split('.')[0]
+ass = p[-1].split('.')[1]
+ass = "." + ass
 newname = tryNewName(filename, namelist)
 print("newname={}".format(newname))
 newname = newname

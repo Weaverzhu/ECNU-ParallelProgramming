@@ -87,6 +87,17 @@ public:
         }
     }
 
+    Matrix operator - (const Matrix &other) const {
+        assert(n == other.n);
+        assert(m == other.m);
+        Matrix res(n, m);
+        for (int i=0; i<n; ++i) {
+            for (int j=0; j<m; ++j) {
+                res.at(i, j) = at(i, j) - other.at(i, j);
+            }
+        }
+    }
+
     Matrix operator * (Matrix &other) {
         assert(m == other.n);
         Matrix res(n, other.m);
@@ -99,6 +110,10 @@ public:
             }
         }
         return res;
+    }
+
+    Matrix operator primitiveMult(Matrix &other) {
+        return *this * other;
     }
 
     inline void output() const {
@@ -121,16 +136,37 @@ public:
 template<typename T>
 class StrassenMatrix : public Matrix<T> {
 private:
+    static const threashold = 32;
     bool checkParity() const {
         return n % 2 == 0 && m % 2 == 0;
     }
 
 public:
     StrassenMatrix operator * (StrassenMatrix &other) {
+        if (n <= threashold) return primitiveMult(other);
+
+
         assert(m == other.n);
         assert(checkParity() && other.checkParity());
-        StrassenMatrix<T> res(n, other.m);
+        StrassenMatrix<T> res(n, other.m),
+        A11 = subMatrix(0, 0, n/2, m/2),
+        A12 = subMatrix(0, m/2, 0, m),
+        A21 = subMatrix(n/2, 0, n, m/2),
+        A22 = subMatrix(n/2, m/2, n, m),
+        B11 = other.subMatrix(0, 0, other.n/2, other.m/2),
+        B12 = other.subMatrix(0, other.m/2, other.n/2, other.m),
+        B21 = other.subMatrix(other.n/2, 0, other.n, other.m/2),
+        B22 = other.subMatrix(other.n/2, other.m/2, other.n, other.m);
 
+        StrassenMatrix<T> P[] = {
+            A11 * B12 - A11 * B22,
+            A11 * B22 - A12 * B22,
+            A21 * B11 + A22 * B11,
+            A22 * B21 - A22 * B11,
+            A11 * B11 + A11 * B22 + A22 * B11 + A22 * B22,
+            A12 * B21 + A12 * B22 - A22 * B21 - A22 * B22,
+            A11 * B11 + A11 * B12 - A21 * B11 - A21 * B12
+        }
         
     }
 };

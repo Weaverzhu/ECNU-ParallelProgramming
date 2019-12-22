@@ -99,7 +99,7 @@ struct ios {
 
    inline ios &operator>>(ld &x)
     {
-
+        
         char ch;
         bool neg = false, dec = false;
         double now = 0.1;

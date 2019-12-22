@@ -11,6 +11,7 @@ output.txt
 input*.txt
 # Prerequisites
 *.d
+port
 
 # Object files
 *.o
