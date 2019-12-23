@@ -3,14 +3,14 @@ import os, math
 
 # ============= config =================
 outputFile = ".\\input.txt"
-cudasource = ".\\cuda\\cudanew.cu"
+cudasource = ".\\cuda\\sharemem.cu"
 brutalforcesource = ".\\baoli\\main.cpp"
 
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
 
-msize = [1, 10]
-ele_range = [1,10]
+msize = [10, 210]
+ele_range = [1,122220]
 
 
 gendata = True

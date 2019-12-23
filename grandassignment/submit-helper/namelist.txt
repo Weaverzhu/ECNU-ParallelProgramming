@@ -28,3 +28,7 @@ cudanew2
 cudanew3
 cuda13
 cuda14
+cudanew4
+cudanew5
+cuda15
+sharemem0
