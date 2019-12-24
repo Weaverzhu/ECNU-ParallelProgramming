@@ -22,6 +22,129 @@ typedef long long LL;
 // const int max_share_size = 512, chunk_size = 1 << 16;
 const int chunk_size = 1<<16;
 
+
+namespace io_impl
+{
+inline bool maybe_digit(char c)
+{
+    return c >= '0' && c <= '9';
+}
+
+struct io_s
+{
+private:
+    FILE *fin;
+    FILE *fout;
+
+    bool negative;
+    bool ok;
+    char ch;
+
+    inline char next_char()
+    {
+        static char buf[100000], *p1 = buf, *p2 = buf;
+        return p1 == p2 && (p2 = (p1 = buf) + fread(buf, 1, 100000, fin), p1 == p2) ? EOF : *p1++;
+    }
+
+public:
+    void init(FILE *_in, FILE *_out)
+    {
+        fin = _in;
+        fout = _out;
+        ch = next_char();
+        ok = true;
+    }
+
+    template <typename T>
+    bool run(T &_v)
+    {
+        _v = 0;
+        while (!maybe_digit(ch) && ch != EOF)
+            ch = next_char();
+        if (ch == EOF)
+            return ok = false;
+        do
+        {
+            _v = (_v << 1) + (_v << 3) + ch - '0';
+        } while (maybe_digit(ch = next_char()));
+        return true;
+    }
+
+    template <typename T>
+    bool rd(T &_v)
+    {
+        negative = false;
+        _v = 0;
+        while (!maybe_digit(ch) && ch != EOF)
+        {
+            negative = ch == '-';
+            ch = next_char();
+        }
+        if (ch == EOF)
+            return ok = false;
+        do
+        {
+            _v = (_v * 10) + (ch - '0');
+        } while (maybe_digit(ch = next_char()));
+        static double _map[] = {1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6};
+        if (ch == '.')
+        {
+            int tp = 0;
+            while (maybe_digit(ch = next_char()))
+            {
+                _v = (_v * 10) + (ch - '0');
+                ++tp;
+            }
+            _v *= _map[tp];
+        }
+        if (negative)
+            _v = -_v;
+        return true;
+    }
+
+    // template <typename T>
+    // bool rd(T &_v)
+    // {
+    //     negative = false;
+    //     _v = 0;
+    //     while (!maybe_digit(ch) && ch != EOF)
+    //     {
+    //         negative = ch == '-';
+    //         ch = next_char();
+    //     }
+    //     if (ch == EOF)
+    //         return ok = false;
+    //     do
+    //     {
+    //         _v = (_v * 10) + (ch - '0');
+    //     } while (maybe_digit(ch = next_char()));
+    //     static int stk[70], tp;
+    //     if (ch == '.')
+    //     {
+    //         tp = 0;
+    //         T _v2 = 0;
+    //         while (maybe_digit(ch = next_char()))
+    //         {
+    //             stk[tp++] = ch - '0';
+    //         }
+    //         while (tp--)
+    //         {
+    //             _v2 = _v2 / 10 + stk[tp];
+    //         }
+    //         _v += _v2 / 10;
+    //     }
+    //     if (negative)
+    //         _v = -_v;
+    //     return true;
+    // }
+};
+
+} // namespace io_impl
+
+using namespace io_impl;
+
+io_s kbio;
+
 namespace output {
     const int OutputBufferSize = 1 << 20;
 
@@ -214,22 +337,24 @@ void outputMatrix(ld *a, int n, int m) {
     }
 }
 
+
 void outputinterval(ld *c, int l, int r) {
     // printf("%p %d %d, %d %d\n", c, l, r, n, m);
     // printf("%.2lf\n", c[1]);
     // exit(0);
     if (l == 0) {
-        output::print('\n');
+        // output::print('\n');
         output::print(c[l++]);
     }
     for (register int i=l; i<r; ++i) {
         if (i % m == 0) output::print('\n');
         else output::print(',');
+        output::print(c[i]);
     }
+    // output::print('\n');
     // output::flush();
     // exit(0);
 }
-
 void outputMatrixAsync(ld *&a, ld *&d_a, int n, int m) {
 
 
@@ -257,7 +382,7 @@ void outputMatrixAsync(ld *&a, ld *&d_a, int n, int m) {
     st -= size;
     // sleep(1000);
     handleCudaError(cudaStreamSynchronize(stream[0]));
-    // handleCudaError(cudaStreamSynchronize(stream[1]));
+    handleCudaError(cudaStreamSynchronize(stream[1]));
     
     outputinterval(a, st, ed);
     output::print('\n');
@@ -266,18 +391,20 @@ void outputMatrixAsync(ld *&a, ld *&d_a, int n, int m) {
 int main()
 {
     // #ifndef Weaverzhu
-    freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
+    // freopen("input.txt", "r", stdin);
+    // freopen("output.txt", "w", stdout);
+    kbio.init(fopen("input.txt", "r"), fopen("output.txt", "w"));
+
 
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, 0);
     cerr << prop.name << endl;
 
-    // cudaStream_t s_a, s_b;
+    cudaStream_t s_a, s_b;
     // cudaStreamCreate(&s_a);
     // cudaStreamCreate(&s_b);
-    // cudaStreamCreateWithFlags(&s_a, cudaStreamNonBlocking);
-    // cudaStreamCreateWithFlags(&s_b, cudaStreamNonBlocking);
+    cudaStreamCreateWithFlags(&s_a, cudaStreamNonBlocking);
+    cudaStreamCreateWithFlags(&s_b, cudaStreamNonBlocking);
 
     // #endif
     io >> an >> am; h_a = (ld*)malloc(sizeof(ld) * an * am);
@@ -285,7 +412,7 @@ int main()
     for (int j=0; j<am; ++j)
         io >> h_a[i*am + j];
     // copyMatrix(d_a, h_a, an, am);
-    // copyMatrixAsync(h_a, d_a, an, am, s_a);
+    copyMatrixAsync(h_a, d_a, an, am, s_a);
 
 
     io >> bn >> bm; h_b = (ld*)malloc(sizeof(ld) * bn * bm);
@@ -293,16 +420,16 @@ int main()
     for (int j=0; j<bm; ++j)
         io >> h_b[i*bm + j];
 
-    copyMatrix(h_a, d_a, an, am);
-    copyMatrix(h_b, d_b, bn, bm);
-    // copyMatrixAsync(h_b, d_b, bn, bm, s_b);
+    // copyMatrix(h_a, d_a, an, am);
+    // copyMatrix(h_b, d_b, bn, bm);
+    copyMatrixAsync(h_b, d_b, bn, bm, s_b);
     n = an;
     m = bm;
     int block_size = prop.maxThreadsPerBlock, grids = (n * m + block_size - 1) / block_size;
 
 
-    // cudaStreamSynchronize(s_a);
-    // cudaStreamSynchronize(s_b);
+    cudaStreamSynchronize(s_a);
+    cudaStreamSynchronize(s_b);
     
     handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");
 
@@ -321,8 +448,8 @@ int main()
 
     handleCudaError(cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost), "memcpy back");
     // printf("h_c=%p\n", h_c);
-    outputMatrix(h_c, n, m);
-    // outputMatrixAsync(h_c, d_c, n, m);
+    // outputMatrix(h_c, n, m);
+    outputMatrixAsync(h_c, d_c, n, m);
     output::flush();
     
     return 0;

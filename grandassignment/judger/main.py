@@ -1,19 +1,21 @@
 from random import randint, random
 import os, math
 
+import time
+
 # ============= config =================
 outputFile = ".\\input.txt"
-cudasource = ".\\cuda\\asyncio.cu"
+cudasource = ".\\cuda\\cuda.cu"
 brutalforcesource = ".\\baoli\\main.cpp"
 
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
 
-msize = [10, 210]
+msize = [100, 210]
 ele_range = [1,122220]
 
-
-gendata = True
+# gendata = True;
+gendata = False
 
 def randomfloat(l, r):
     return random() * (r-l) + l
@@ -48,13 +50,18 @@ class Runner:
 
     def go(self):
         print("log: start to run {}".format(self.runner))
+        starttime = time.time()
         ret = os.system("{} {}".format(self.runner, self.sourcepath))
+        endtime = time.time()
         if ret != 0:
             print("err: running {} failed".format(self.name))
+        
         ret = os.system("xcopy /y .\\output.txt {}".format(self.outputfile))
+        
         if ret != 0:
             print("err: copying the output of {} failed".format(self.name))
-        print("log: running {} completed".format(self.runner))
+        print("log: running {} completed, time used: {}".format(self.runner, endtime - starttime))
+
 
     def diff(self, otherRunner):
         os.system("fc {} {}".format(self.outputfile, otherRunner.outputfile))
@@ -115,19 +122,18 @@ if gendata:
 
 cuda.go()
 
+if gendata:
+    brutalforce.go()
 
+    # cuda.diff(brutalforce)
+    f1 = open(cuda.outputfile, "r")
+    f2 = open(brutalforce.outputfile, "r")
 
-brutalforce.go()
+    cudaAns = matrixcmp(f1.read())
+    bfAns = matrixcmp(f2.read())
 
-# cuda.diff(brutalforce)
-f1 = open(cuda.outputfile, "r")
-f2 = open(brutalforce.outputfile, "r")
+    res = cudaAns.diff(bfAns)
 
-cudaAns = matrixcmp(f1.read())
-bfAns = matrixcmp(f2.read())
-
-res = cudaAns.diff(bfAns)
-
-f1.close()
-f2.close()
+    f1.close()
+    f2.close()
 

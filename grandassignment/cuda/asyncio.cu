@@ -16,7 +16,7 @@ using namespace std;
 typedef double ld;
 typedef long long LL;
 
-const int max_share_size = 512, chunk_size = 1 << 16;
+// const int max_share_size = 512, chunk_size = 1 << 16;
 
 namespace output {
     const int OutputBufferSize = 1e6+5;
@@ -184,17 +184,10 @@ __global__ void matrixMult(T *d_a, T *d_b, T *d_c, int an, int bm, int am) {
     int index = blockDim.x * blockIdx.x + threadIdx.x;
     int i = index / bm, j = index % bm;
     if (i >= an || j >= bm) return;
-    ld sum = 0;
-    int shareda = min(am, max_share_size);
-    ld c_a[max_share_size];
+    register ld sum = 0;
     int basea = i * am;
-    for (int k=0; k<shareda; ++k)
-        c_a[k] = d_a[basea+k];
-    __syncthreads();
-
-    for (int k=0; k<shareda; ++k)
-        sum += c_a[k] * d_b[k * bm + j];
-    for (int k=shareda; k<am; ++k)
+   
+    for (int k=0; k<am; ++k)
         sum += d_a[basea + k] * d_b[k * bm + j];
 
     d_c[i * bm + j] = sum;
