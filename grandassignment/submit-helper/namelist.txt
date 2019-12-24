@@ -37,3 +37,7 @@ sharemem2
 sharemem3
 asyncio0
 asyncio1
+cudakbio0
+cudakbio1
+cudakbio2
+asyncwithkbio0

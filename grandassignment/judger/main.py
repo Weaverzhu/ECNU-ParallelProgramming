@@ -5,17 +5,17 @@ import time
 
 # ============= config =================
 outputFile = ".\\input.txt"
-cudasource = ".\\cuda\\cuda.cu"
+cudasource = ".\\cuda\\asyncwithkbio.cu"
 brutalforcesource = ".\\baoli\\main.cpp"
 
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
 
-msize = [100, 210]
+msize = [30, 41]
 ele_range = [1,122220]
 
 # gendata = True;
-gendata = False
+gendata = True
 
 def randomfloat(l, r):
     return random() * (r-l) + l

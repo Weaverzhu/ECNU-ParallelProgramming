@@ -8,14 +8,13 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-#include <device_functions.h>
+// #include <device_functions.h>
 #include <cuda_runtime_api.h>
 
 using namespace std;
 
 typedef double ld;
 typedef long long LL;
-
 
 namespace io_impl
 {
@@ -95,42 +94,7 @@ public:
             _v = -_v;
         return true;
     }
-
-    // template <typename T>
-    // bool rd(T &_v)
-    // {
-    //     negative = false;
-    //     _v = 0;
-    //     while (!maybe_digit(ch) && ch != EOF)
-    //     {
-    //         negative = ch == '-';
-    //         ch = next_char();
-    //     }
-    //     if (ch == EOF)
-    //         return ok = false;
-    //     do
-    //     {
-    //         _v = (_v * 10) + (ch - '0');
-    //     } while (maybe_digit(ch = next_char()));
-    //     static int stk[70], tp;
-    //     if (ch == '.')
-    //     {
-    //         tp = 0;
-    //         T _v2 = 0;
-    //         while (maybe_digit(ch = next_char()))
-    //         {
-    //             stk[tp++] = ch - '0';
-    //         }
-    //         while (tp--)
-    //         {
-    //             _v2 = _v2 / 10 + stk[tp];
-    //         }
-    //         _v += _v2 / 10;
-    //     }
-    //     if (negative)
-    //         _v = -_v;
-    //     return true;
-    // }
+    
 };
 
 } // namespace io_impl
@@ -140,7 +104,7 @@ using namespace io_impl;
 io_s iokb;
 
 namespace output {
-    const int OutputBufferSize = 1e6+5;
+    const int OutputBufferSize = 1 << 20;
 
     char buffer[OutputBufferSize];
     char *s = buffer;
@@ -160,33 +124,53 @@ namespace output {
     inline void print(int x) {
         // printf("%d", x); return;
         char buf[25] = {0}, *p = buf;
-        if (x<0) print('-'), x=-x;
-        if (x == 0) print('0');
+        // if (x<0) print('-'), x=-x;
+        // if (x == 0) print('0');
         while (x) *(++p) = x%10, x/=10;
         while (p != buf) print(char(*(p--)+'0'));
     }
 
-    inline void print(ld x) {
+    inline void print(LL x) {
+        // printf("%d", x); return;
+        char buf[25] = {0}, *p = buf;
+        // if (x<0) print('-'), x=-x;
+        // if (x == 0) print('0');
+        while (x) *(++p) = x%10, x/=10;
+        while (p != buf) print(char(*(p--)+'0'));
+    }
+
+    inline void print(ld v) {
         // printf("%.2f", x);
-        static char buf[100];
-        sprintf(buf, "%.2f", x);
-        print(buf);
+        // static int stk[70], tp;
+        // tp = 0;
+        if (fabs(v) < 0.005)
+        {
+            print('0');
+            return;
+        }
+        else
+        {
+            LL x = (LL)floor(v * 100 + 0.5);
+            print((LL)(x / 100));
+            print('.');
+            print((char)(x / 10 % 10 + '0'));
+            print((char)(x % 10 + '0'));
+        }
     }
 }
+
 
 
 struct ios {
     
     inline ios & operator >> (int &x){
-        iokb.run(&x);
+        iokb.run(x);
         return *this;
     }
-
 
    inline ios &operator>>(ld &x)
     {
         iokb.rd(x);
-        
         return *this;
     }
 } io;
@@ -245,7 +229,7 @@ void outputMatrix(ld *a, int n, int m) {
 int main()
 {
     // #ifndef Weaverzhu
-    freopen("input.txt", "r", stdin);
+    // freopen("input.txt", "r", stdin);
     freopen("output.txt", "w", stdout);
 
     iokb.init(fopen("input.txt", "r"), fopen("output.txt", "w"));

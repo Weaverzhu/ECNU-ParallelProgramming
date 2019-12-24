@@ -15,13 +15,10 @@
 #include <cuda_runtime_api.h>
 
 using namespace std;
+const int chunk_size = 1<<16;
 
 typedef double ld;
 typedef long long LL;
-
-// const int max_share_size = 512, chunk_size = 1 << 16;
-const int chunk_size = 1<<16;
-
 
 namespace io_impl
 {
@@ -101,66 +98,14 @@ public:
             _v = -_v;
         return true;
     }
-    template <typename T>
-    inline void o(T p)
-    {
-        static int stk[70], tp;
-        if (p == 0)
-        {
-            putchar('0');
-            return;
-        }
-        if (p < 0)
-        {
-            p = -p;
-            putchar('-');
-        }
-        while (p)
-            stk[++tp] = p % 10, p /= 10;
-        while (tp)
-            putchar(stk[tp--] + '0');
-    }
-
-    template <typename T>
-    inline void od(T v)
-    {
-        static int stk[70], tp;
-        tp = 0;
-        if (fabs(v) < 0.005)
-        {
-            putchar('0');
-            return;
-        }
-        else
-        {
-            if (v < 0)
-            {
-                v = -v;
-                putchar('-');
-            }
-            LL x = (LL)floor(v * 100 + 0.5);
-            o(x / 100);
-            putchar('.');
-            putchar(x / 10 % 10 + '0');
-            putchar(x % 10 + '0');
-        }
-    }
-
-    // for (int i = 0; i < A; ++i)
-    // {
-    //     for (int j = 0; j < C; ++j) {
-    //         // printf("%.2f%c", c[i][j], j + 1 == C ? '\n' : ',');
-    //         io.od(c[i][j]);
-    //         putchar(j + 1 == C ? '\n' : ',');
-    //     }
-    // }
+    
 };
 
 } // namespace io_impl
 
 using namespace io_impl;
 
-io_s kbio;
+io_s iokb;
 
 namespace output {
     const int OutputBufferSize = 1 << 20;
@@ -200,126 +145,36 @@ namespace output {
 
     inline void print(ld v) {
         // printf("%.2f", x);
-        static int stk[70], tp;
-        tp = 0;
-        if (fabs(x) < 0.005)
+        // static int stk[70], tp;
+        // tp = 0;
+        if (fabs(v) < 0.005)
         {
             print('0');
             return;
         }
         else
         {
-            if (v < 0)
-            {
-                v = -v;
-                putchar('-');
-            }
             LL x = (LL)floor(v * 100 + 0.5);
-            print((int)(x / 100));
+            print((LL)(x / 100));
             print('.');
-            print(x / 10 % 10 + '0');
-            print(x % 10 + '0');
+            print((char)(x / 10 % 10 + '0'));
+            print((char)(x % 10 + '0'));
         }
     }
 }
 
 
+
 struct ios {
-    static const int IN_LEN=1<<18|1;
-    char buf[IN_LEN],*s,*t; 
-    inline char read(){
-        return (s==t)&&(t=(s=buf)+fread(buf,1,IN_LEN,stdin)),s==t?-1:*s++;
-    }
-    inline bool isEOF() {   
-        return (s==t)&&(t=(s=buf)+fread(buf,1,IN_LEN,stdin)),s==t;
-    }
+    
     inline ios & operator >> (int &x){
-        static char c11,boo;
-        for(c11=read(),boo=0;!isdigit(c11);c11=read()){
-            if(c11==-1)return *this;
-            boo|=c11=='-';
-        }
-        for(x=0;isdigit(c11);c11=read())x=x*10+(c11^'0');
-        boo&&(x=-x);
-        return *this;
-    }
-
-    inline ios & operator >> (LL &x){
-        static char c11,boo;
-        for(c11=read(),boo=0;!isdigit(c11);c11=read()){
-            if(c11==-1)return *this;
-            boo|=c11=='-';
-        }
-        for(x=0;isdigit(c11);c11=read())x=x*10+(c11^'0');
-        boo&&(x=-x);
-        return *this;
-    }
-
-    inline ios &operator >> (char *s) {
-        int len = 0;
-        char ch;
-        for (ch=read(); ch=='\n' || ch == ' '; ch=read());
-        if (ch == -1) {
-            s[len] = 0;
-            return *this;
-        }
-        for (; ch!='\n' && ch != ' ' && ch != -1;ch=read())
-            s[len++] = ch;
-        s[len] = 0;
+        iokb.run(x);
         return *this;
     }
 
    inline ios &operator>>(ld &x)
     {
-
-        char ch;
-        bool neg = false, dec = false;
-        double now = 0.1;
-        for (ch=read(); !isdigit(ch) && (ch!='.' && ch!='-') && ch!=-1; ch=read());
-
-        if (ch == '-') neg = true;
-        else if (ch == '.') { x = 0; dec = true; }
-        else if (ch != -1) x = ch-'0';
-        else return *this;
-        if (!dec) {
-            for (ch=read(); isdigit(ch) && ch!=-1; ch=read()) {
-                x = x * 10 + ch-'0';
-            }
-        }
-
-        if (ch == '.')
-            for (ch=read(); isdigit(ch) && ch!=-1; ch=read()) {
-                x += now * (ch - '0'); now *= 0.1;
-            }
-        if (neg) x = -x;
-        
-        return *this;
-    }
-
-    inline ios &operator>>(long double &x)
-    {
-
-        char ch;
-        bool neg = false, dec = false;
-        double now = 0.1;
-        for (ch=read(); !isdigit(ch) && (ch!='.' && ch!='-') && ch!=-1; ch=read());
-
-        if (ch == '-') neg = true;
-        else if (ch == '.') { x = 0; dec = true; }
-        else if (ch != -1) x = ch-'0';
-        else return *this;
-        if (!dec) {
-            for (ch=read(); isdigit(ch) && ch!=-1; ch=read()) {
-                x = x * 10 + ch-'0';
-            }
-        }
-
-        if (ch == '.')
-            for (ch=read(); isdigit(ch) && ch!=-1; ch=read()) {
-                x += now * (ch - '0'); now *= 0.1;
-            }
-        if (neg) x = -x;
-        
+        iokb.rd(x);
         return *this;
     }
 } io;
@@ -331,7 +186,6 @@ inline void handleCudaError(cudaError_t err, string name = "fuck") {
         exit(0);
     }
 }
-
 ld *d_a, *d_b, *d_c, *h_a, *h_b, *h_c;
 int an, am, bn, bm;
 int n, m;
@@ -435,8 +289,8 @@ int main()
 {
     // #ifndef Weaverzhu
     // freopen("input.txt", "r", stdin);
-    // freopen("output.txt", "w", stdout);
-    kbio.init(fopen("input.txt", "r"), fopen("output.txt", "w"));
+    freopen("output.txt", "w", stdout);
+    iokb.init(fopen("input.txt", "r"), fopen("output.txt", "w"));
 
 
     cudaDeviceProp prop;
