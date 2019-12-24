@@ -204,18 +204,19 @@ __global__ void matrixMult3(ld *d_a, ld *d_b, ld *d_c, int an, int bn, int am) {
     int i = index / bn, j = index % bn;
     if (i >= an || j >= bn) return;
 
-    int shareda = min(am, max_shared_size);
-    __shared__ ld c_a[max_shared_size];
+    // int shareda = min(am, max_shared_size);
+    // __shared__ ld c_a[max_shared_size];
+    int shareda = 0;
 
     int baseb = j * am, basea = i * am;
-    for (int k=0; k<shareda; ++k) {
-        c_a[k] = d_a[basea+k];
-    }
-    __syncthreads();
+    // for (int k=0; k<shareda; ++k) {
+    //     c_a[k] = d_a[basea+k];
+    // }
+    // __syncthreads();
     ld sum = 0;
     
-    for (int k=0; k<shareda; ++k) {
-        sum += c_a[basea + k] * d_b[baseb+k];
+    // for (int k=0; k<shareda; ++k) {
+    //     sum += c_a[basea + k] * d_b[baseb+k];
     }
     for (int k=shareda; k<am; ++k)
         sum += d_a[basea + k] * d_b[baseb + k];
