@@ -3,7 +3,7 @@ import os, math
 
 # ============= config =================
 outputFile = ".\\input.txt"
-cudasource = ".\\cuda\\sharemem.cu"
+cudasource = ".\\cuda\\asyncio.cu"
 brutalforcesource = ".\\baoli\\main.cpp"
 
 cudarun = ".\\cuda.bat"

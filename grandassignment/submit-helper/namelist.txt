@@ -35,3 +35,4 @@ sharemem0
 sharemem1
 sharemem2
 sharemem3
+asyncio0
