@@ -178,7 +178,7 @@ struct ios {
 
 // ======================================================
 
-const int max_shared_size = 1024;
+// const int max_shared_size = 6144;
 
 inline void handleCudaError(cudaError_t err, string name = "fuck") {
     if (err != cudaSuccess) {
@@ -220,32 +220,33 @@ void copyMatrix(ld *&src,  ld *&dst, int n, int m) {
 
 
 __global__ void matrixMult2(ld *d_a, ld *d_b, ld *d_c, int an, int bm, int am, int workload, int addi) {
-    __shared__ ld c_a[max_shared_size];
+    // __shared__ ld c_a[max_shared_size];
 
     int index = blockDim.x * blockIdx.x + threadIdx.x;
     if (index >= an * bm) return;
-    int st = min(index, addi) * (workload+1) + max(0, index - addi) * workload, ed = st + workload + (index < addi ? 1 : 0);
-    int shareda = min(am, max_shared_size);
+    int st = min(index, addi) * (workload+1) + max(0, index - addi) * workload, ed = st + workload + (index < addi ? 1 : 0), base = st / bm * bm;
+    if (st % bm == 0) base -= bm;
+    // int shareda = min(am, max_shared_size);
     // shareda = 2;
     // shareda = 0;
 
     for (int p=st; p<ed; ++p) {
-        int i = p / bm, j = p % bm;
-        if (p % bm == 0) {
+        // if (p % bm == 0) {
+        //     base += bm;
             
-            for (int j=0; j<shareda; ++j) {
-                c_a[j] = d_a[i * am + j];
-            }
-            __syncthreads();
-        }
-        // if (p % bm == 0) base += bm;
-        
+        //     for (int j=0; j<shareda; ++j) {
+        //         c_a[j] = d_a[base + j];
+        //     }
+        //     __syncthreads();
+        // }
+        if (p % bm == 0) base += bm;
+        int i = p / bm, j = p % bm;
         ld sum = 0;
-        for (int k=0; k<shareda; ++k) {
-            sum += c_a[k] * d_b[j * bm + k];
-        }
-        for (int k=shareda; k<am; ++k) {
-        // for (int k=0; k<am; ++k) {
+        // for (int k=0; k<shareda; ++k) {
+        //     sum += c_a[k] * d_b[j * bm + k];
+        // }
+        // for (int k=shareda; k<am; ++k) {
+        for (int k=0; k<am; ++k) {
             sum += d_a[i * am + k] * d_b[k * bm + j];
         }
         d_c[i * bm + j] = sum;
@@ -302,41 +303,39 @@ int main()
     
     n = an;
     m = bm;
-    int block_size = min(am, prop.maxThreadsPerBlock);
+    // int block_size = prop.maxThreadsPerBlock, grids = (n * m + block_size - 1) / block_size;
+    // int block_size = bm;
 
-    int numBlocks = 2 * prop.multiProcessorCount;
-    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocks, matrixMult2, block_size, 0);
+    // int numBlocks;
+    // cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocks, matrixMult2, block_size, 0);
     // double activeWarps = numBlocks * block_size / prop.warpSize,
     // maxWarps = prop.maxThreadsPerMultiProcessor / prop.warpSize;
     // cerr << "occupancy = " << activeWarps / maxWarps * 100 << "% " << endl;
     // cerr << "numBlocks = " << numBlocks << "threads = "<< numBlocks * block_size <<endl;
     // exit(0);
-    int grids = (an * am + block_size - 1) / block_size;
-    grids = (grids + 1) / 2;
-    grids = 2 * prop.multiProcessorCount;
-    cerr << "grids=" << grids << ", block_size=" << block_size << endl;
+    // int grids = numBlocks;
 
-    copyMatrix(h_a, d_a, an, am);
-    copyMatrix(h_b, d_b, bn, bm);
-    handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");
+    // copyMatrix(h_a, d_a, an, am);
+    // copyMatrix(h_b, d_b, bn, bm);
+    // handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");
 
-    int threads = grids * block_size;
-    int tot = an * bm;
-    int workload = (tot) / threads, size996 = tot % threads;
+    // int threads = grids * block_size;
+    // int tot = an * bm;
+    // int workload = (tot) / threads, size996 = tot % threads;
 
-    fprintf(stderr, "stderr: threads=%d, tot=%d, workload=%d, addi=%d\n", threads, tot, workload, size996);
-    // exit(0);
+    // // fprintf(stderr, "stderr: threads=%d, tot=%d, workload=%d, addi=%d\n", threads, tot, workload, size996);
+    // // exit(0);
 
     // // matrixMult<<<grids, block_size>>>(d_a, d_b, d_c, an, bm, am);
-    matrixMult2<<<grids, block_size>>>(d_a, d_b, d_c, an, bm, am, workload, size996);
-    h_c = (ld*)malloc(sizeof(ld) * n * m);
-    int size = sizeof(ld) * n * m;
+    // matrixMult2<<<grids, block_size>>>(d_a, d_b, d_c, an, bm, am, workload, size996);
+    // h_c = (ld*)malloc(sizeof(ld) * n * m);
+    // int size = sizeof(ld) * n * m;
 
 
-    handleCudaError(cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost), "memcpy back");
+    // handleCudaError(cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost), "memcpy back");
     
-    outputMatrix(h_c, n, m);
-    output::flush();
+    // outputMatrix(h_c, n, m);
+    // output::flush();
     
     return 0;
 }

@@ -14,7 +14,8 @@ brutallinux = "./bf.sh"
 
 msize = [30, 41]
 ele_range = [0,1220220]
-gendata = True
+# gendata = True
+gendata = False
 
 def randomfloat(l, r):
     return random() * (r-l) + l
@@ -127,8 +128,11 @@ k = randint(msize[0], msize[1])
 # n = 1
 # m = 5000
 # k = 1
+# n = 1000
+# m = 10
+# k = 1000
 
-cuda = Runner(".\\cuda\\asyncio3.cu", "cuda", cudarun)
+cuda = Runner(".\\cuda\\cudaoptblock.cu", "cuda", cudarun)
 brutalforce = Runner(".\\baoli\\main.cpp", "bf", brutalforcerun)
 brutalforcelinux = Runner("./baoli/main.cpp", "main", brutallinux)
 cudakbio = Runner(".\\cuda\\cudakbio.cu", "cudakbio", cudarun)
@@ -151,8 +155,8 @@ def runtest(gendata = True, main = cuda, std = brutalforce, ele_range = [0, 1000
     if gendata:
         
         std.go()
-        f1 = open(cuda.outputfile, "r")
-        f2 = open(brutalforce.outputfile, "r")
+        f1 = open(main.outputfile, "r")
+        f2 = open(std.outputfile, "r")
 
         mainAns = matrixcmp(f1.read())
         bfAns = matrixcmp(f2.read())
@@ -164,7 +168,10 @@ def cudatest():
     runtest(gendata, cuda, brutalforce, ele_range)
 
 def mpitest():
-    runtest(gendata, mpi, brutalforcelinux, ele_range)
+    runtest(gendata, mpi, brutalforcelinux, ele_range, True)
 
-cudatest();
+# cudatest();
 # mpitest();
+test1 = Runner('.\\baoli\\main2.cpp', 'main2', brutalforcerun)
+test2 = Runner('.\\baoli\\main.cpp', 'main', brutalforcerun)
+runtest(True, test1, test2, [0,1000])

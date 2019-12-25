@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <assert.h>
 const int N = 5000;
+
+typedef long long LL;
+
 double **a, **b, **c;
+LL **ha, **hb, **hc;
 
 
 int main(int argc, char const *argv[])

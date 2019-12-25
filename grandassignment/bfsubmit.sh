@@ -1,0 +1,1 @@
+python3 kblack-submit.py -u 10175102111 -p O52afkHEsPn5 -m MPI -n 1 -c 8 ../baoli/main2.cpp
