@@ -5,14 +5,14 @@ import time
 
 # ============= config =================
 outputFile = ".\\input.txt"
-cudasource = ".\\cuda\\asyncwithkbio.cu"
+cudasource = ".\\cuda\\cudakbio.cu"
 brutalforcesource = ".\\baoli\\main.cpp"
 
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
 
 msize = [30, 41]
-ele_range = [1,122220]
+ele_range = [-1222220,1220220]
 
 # gendata = True;
 gendata = True
@@ -107,9 +107,13 @@ class matrixcmp:
 
         pass
         
-n = randint(msize[0], msize[1])
-m = randint(msize[0], msize[1])
-k = randint(msize[0], msize[1])
+# n = randint(msize[0], msize[1])
+# m = randint(msize[0], msize[1])
+# k = randint(msize[0], msize[1])
+
+n = 1
+m = 5000
+k = 1
 
 cuda = Runner(cudasource, "cuda", cudarun)
 brutalforce = Runner(brutalforcesource, "bf", brutalforcerun)

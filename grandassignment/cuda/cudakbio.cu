@@ -133,8 +133,8 @@ namespace output {
     inline void print(LL x) {
         // printf("%d", x); return;
         char buf[25] = {0}, *p = buf;
-        // if (x<0) print('-'), x=-x;
-        // if (x == 0) print('0');
+        if (x<0) print('-'), x=-x;
+        if (x == 0) print('0');
         while (x) *(++p) = x%10, x/=10;
         while (p != buf) print(char(*(p--)+'0'));
     }
@@ -151,6 +151,7 @@ namespace output {
         else
         {
             LL x = (LL)floor(v * 100 + 0.5);
+            // cerr << "x=" << x << endl;
             print((LL)(x / 100));
             print('.');
             print((char)(x / 10 % 10 + '0'));
