@@ -213,6 +213,11 @@ __global__ void matrixMult(T *d_a, T *d_b, T *d_c, int an, int bm, int am) {
     //     d_c[index] = 1; 
 }
 
+template<typename T>
+__global__ void matrixMult2(T *d_a, T *d_b, T *d_c, int an, int bm, int am, int workload_size, int 996size) {
+    int blockindex =
+}
+
 void outputMatrix(ld *a, int n, int m) {
     // output::print(n); output::print(',');
     // output::print(m); output::print('\n');
@@ -237,7 +242,8 @@ int main()
 
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, 0);
-    cerr << prop.name << endl;
+    cerr << prop.multiProcessorCount << endl;
+    // cerr << prop.sharedMemPerMultiprocessor
     // #endif
     io >> an >> am; h_a = (ld*)malloc(sizeof(ld) * an * am);
     for (int i=0; i<an; ++i)
@@ -256,7 +262,8 @@ int main()
     
     n = an;
     m = bm;
-    int block_size = prop.maxThreadsPerBlock, grids = (n * m + block_size - 1) / block_size;
+    // int block_size = prop.maxThreadsPerBlock, grids = (n * m + block_size - 1) / block_size;
+    int block_size = prop.maxThreadsPerBlock, grids = 2 * prop.multiProcessorCount;
     copyMatrix(h_a, d_a, an, am);
     copyMatrix(h_b, d_b, bn, bm);
     handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");

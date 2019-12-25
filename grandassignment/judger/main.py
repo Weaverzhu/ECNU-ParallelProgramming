@@ -13,7 +13,7 @@ mpirun = "./mpi.sh"
 brutallinux = "./bf.sh"
 
 msize = [30, 41]
-ele_range = [-1222220,1220220]
+ele_range = [0,1220220]
 gendata = True
 
 def randomfloat(l, r):
@@ -114,7 +114,7 @@ class matrixcmp:
                 
                 err_val = math.fabs((f1 - f2) / max([f2, 1]))
                 if err_val > eps:
-                    print("log: diff val: i={} j={} f1={} f2={}".format(i, j, f1, f2))
+                    print("log: diff val: i={} j={} f1={} f2={}, err_val={}".format(i, j, f1, f2, err_val))
                     return True
         print("log: no diff err!, Accepted")
         return False
@@ -128,7 +128,7 @@ k = randint(msize[0], msize[1])
 # m = 5000
 # k = 1
 
-cuda = Runner(".\\cuda\\cuda.cu", "cuda", cudarun)
+cuda = Runner(".\\cuda\\asyncio3.cu", "cuda", cudarun)
 brutalforce = Runner(".\\baoli\\main.cpp", "bf", brutalforcerun)
 brutalforcelinux = Runner("./baoli/main.cpp", "main", brutallinux)
 cudakbio = Runner(".\\cuda\\cudakbio.cu", "cudakbio", cudarun)
@@ -140,7 +140,7 @@ def runtest(gendata = True, main = cuda, std = brutalforce, ele_range = [0, 1000
         if (isInLinux):
             inputfile = inputFileLinux
 
-            
+
         f = open(inputfile, "w")
         f.write(randomMatrixStr(n, m, ele_range[0], ele_range[1]))
         f.write(randomMatrixStr(m, k, ele_range[0], ele_range[1]))
@@ -166,5 +166,5 @@ def cudatest():
 def mpitest():
     runtest(gendata, mpi, brutalforcelinux, ele_range)
 
-
-mpitest();
+cudatest();
+# mpitest();

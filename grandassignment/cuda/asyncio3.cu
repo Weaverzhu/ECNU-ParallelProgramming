@@ -101,66 +101,14 @@ public:
             _v = -_v;
         return true;
     }
-    template <typename T>
-    inline void o(T p)
-    {
-        static int stk[70], tp;
-        if (p == 0)
-        {
-            putchar('0');
-            return;
-        }
-        if (p < 0)
-        {
-            p = -p;
-            putchar('-');
-        }
-        while (p)
-            stk[++tp] = p % 10, p /= 10;
-        while (tp)
-            putchar(stk[tp--] + '0');
-    }
-
-    template <typename T>
-    inline void od(T v)
-    {
-        static int stk[70], tp;
-        tp = 0;
-        if (fabs(v) < 0.005)
-        {
-            putchar('0');
-            return;
-        }
-        else
-        {
-            if (v < 0)
-            {
-                v = -v;
-                putchar('-');
-            }
-            LL x = (LL)floor(v * 100 + 0.5);
-            o(x / 100);
-            putchar('.');
-            putchar(x / 10 % 10 + '0');
-            putchar(x % 10 + '0');
-        }
-    }
-
-    // for (int i = 0; i < A; ++i)
-    // {
-    //     for (int j = 0; j < C; ++j) {
-    //         // printf("%.2f%c", c[i][j], j + 1 == C ? '\n' : ',');
-    //         io.od(c[i][j]);
-    //         putchar(j + 1 == C ? '\n' : ',');
-    //     }
-    // }
+    
 };
 
 } // namespace io_impl
 
 using namespace io_impl;
 
-io_s kbio;
+io_s iokb;
 
 namespace output {
     const int OutputBufferSize = 1 << 20;
@@ -192,134 +140,46 @@ namespace output {
     inline void print(LL x) {
         // printf("%d", x); return;
         char buf[25] = {0}, *p = buf;
-        // if (x<0) print('-'), x=-x;
-        // if (x == 0) print('0');
+        
+        if (x == 0) print('0');
         while (x) *(++p) = x%10, x/=10;
         while (p != buf) print(char(*(p--)+'0'));
     }
 
     inline void print(ld v) {
         // printf("%.2f", x);
-        static int stk[70], tp;
-        tp = 0;
-        if (fabs(x) < 0.005)
+        // static int stk[70], tp;
+        // tp = 0;
+        if (fabs(v) < 0.005)
         {
             print('0');
             return;
         }
         else
         {
-            if (v < 0)
-            {
-                v = -v;
-                putchar('-');
-            }
             LL x = (LL)floor(v * 100 + 0.5);
-            print((int)(x / 100));
+            if (x<0) print('-'), x=-x;
+            // cerr << "x=" << x << endl; exit(0);
+            print((LL)(x / 100));
             print('.');
-            print(x / 10 % 10 + '0');
-            print(x % 10 + '0');
+            print((char)(x / 10 % 10 + '0'));
+            print((char)(x % 10 + '0'));
         }
     }
 }
 
 
+
 struct ios {
-    static const int IN_LEN=1<<18|1;
-    char buf[IN_LEN],*s,*t; 
-    inline char read(){
-        return (s==t)&&(t=(s=buf)+fread(buf,1,IN_LEN,stdin)),s==t?-1:*s++;
-    }
-    inline bool isEOF() {   
-        return (s==t)&&(t=(s=buf)+fread(buf,1,IN_LEN,stdin)),s==t;
-    }
+    
     inline ios & operator >> (int &x){
-        static char c11,boo;
-        for(c11=read(),boo=0;!isdigit(c11);c11=read()){
-            if(c11==-1)return *this;
-            boo|=c11=='-';
-        }
-        for(x=0;isdigit(c11);c11=read())x=x*10+(c11^'0');
-        boo&&(x=-x);
-        return *this;
-    }
-
-    inline ios & operator >> (LL &x){
-        static char c11,boo;
-        for(c11=read(),boo=0;!isdigit(c11);c11=read()){
-            if(c11==-1)return *this;
-            boo|=c11=='-';
-        }
-        for(x=0;isdigit(c11);c11=read())x=x*10+(c11^'0');
-        boo&&(x=-x);
-        return *this;
-    }
-
-    inline ios &operator >> (char *s) {
-        int len = 0;
-        char ch;
-        for (ch=read(); ch=='\n' || ch == ' '; ch=read());
-        if (ch == -1) {
-            s[len] = 0;
-            return *this;
-        }
-        for (; ch!='\n' && ch != ' ' && ch != -1;ch=read())
-            s[len++] = ch;
-        s[len] = 0;
+        iokb.run(x);
         return *this;
     }
 
    inline ios &operator>>(ld &x)
     {
-
-        char ch;
-        bool neg = false, dec = false;
-        double now = 0.1;
-        for (ch=read(); !isdigit(ch) && (ch!='.' && ch!='-') && ch!=-1; ch=read());
-
-        if (ch == '-') neg = true;
-        else if (ch == '.') { x = 0; dec = true; }
-        else if (ch != -1) x = ch-'0';
-        else return *this;
-        if (!dec) {
-            for (ch=read(); isdigit(ch) && ch!=-1; ch=read()) {
-                x = x * 10 + ch-'0';
-            }
-        }
-
-        if (ch == '.')
-            for (ch=read(); isdigit(ch) && ch!=-1; ch=read()) {
-                x += now * (ch - '0'); now *= 0.1;
-            }
-        if (neg) x = -x;
-        
-        return *this;
-    }
-
-    inline ios &operator>>(long double &x)
-    {
-
-        char ch;
-        bool neg = false, dec = false;
-        double now = 0.1;
-        for (ch=read(); !isdigit(ch) && (ch!='.' && ch!='-') && ch!=-1; ch=read());
-
-        if (ch == '-') neg = true;
-        else if (ch == '.') { x = 0; dec = true; }
-        else if (ch != -1) x = ch-'0';
-        else return *this;
-        if (!dec) {
-            for (ch=read(); isdigit(ch) && ch!=-1; ch=read()) {
-                x = x * 10 + ch-'0';
-            }
-        }
-
-        if (ch == '.')
-            for (ch=read(); isdigit(ch) && ch!=-1; ch=read()) {
-                x += now * (ch - '0'); now *= 0.1;
-            }
-        if (neg) x = -x;
-        
+        iokb.rd(x);
         return *this;
     }
 } io;
@@ -435,53 +295,52 @@ int main()
 {
     // #ifndef Weaverzhu
     // freopen("input.txt", "r", stdin);
-    // freopen("output.txt", "w", stdout);
-    kbio.init(fopen("input.txt", "r"), fopen("output.txt", "w"));
+    freopen("output.txt", "w", stdout);
+    iokb.init(fopen("input.txt", "r"), fopen("output.txt", "w"));
 
 
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, 0);
     cerr << prop.name << endl;
 
-    cudaStream_t s_a, s_b;
-    // cudaStreamCreate(&s_a);
-    // cudaStreamCreate(&s_b);
-    cudaStreamCreateWithFlags(&s_a, cudaStreamNonBlocking);
-    cudaStreamCreateWithFlags(&s_b, cudaStreamNonBlocking);
+    cudaStream_t mainstream;
+    cudaStreamCreate(&mainstream);
 
     // #endif
-    io >> an >> am; h_a = (ld*)malloc(sizeof(ld) * an * am);
+    io >> an >> am; 
+    // h_a = (ld*)malloc(sizeof(ld) * an * am);
+    handleCudaError(cudaHostAlloc(&h_a, sizeof(ld) * an * am, cudaHostAllocDefault));
     for (int i=0; i<an; ++i)
     for (int j=0; j<am; ++j)
         io >> h_a[i*am + j];
     // copyMatrix(d_a, h_a, an, am);
-    copyMatrixAsync(h_a, d_a, an, am, s_a);
+    copyMatrixAsync(h_a, d_a, an, am, mainstream);
 
 
-    io >> bn >> bm; h_b = (ld*)malloc(sizeof(ld) * bn * bm);
+    io >> bn >> bm; 
+    // h_b = (ld*)malloc(sizeof(ld) * bn * bm);
+    handleCudaError(cudaHostAlloc(&h_b, sizeof(ld) * bn * bm, cudaHostAllocDefault));
     for (int i=0; i<bn; ++i)
     for (int j=0; j<bm; ++j)
         io >> h_b[i*bm + j];
 
     // copyMatrix(h_a, d_a, an, am);
     // copyMatrix(h_b, d_b, bn, bm);
-    copyMatrixAsync(h_b, d_b, bn, bm, s_b);
+    copyMatrixAsync(h_b, d_b, bn, bm, mainstream);
     n = an;
     m = bm;
     int block_size = prop.maxThreadsPerBlock, grids = (n * m + block_size - 1) / block_size;
-
-
-    cudaStreamSynchronize(s_a);
-    cudaStreamSynchronize(s_b);
     
     handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");
 
-    matrixMult<<<grids, block_size>>>(d_a, d_b, d_c, an, bm, am);
-    h_c = (ld*)malloc(sizeof(ld) * n * m);
+    matrixMult<<<grids, block_size, 0, mainstream>>>(d_a, d_b, d_c, an, bm, am);
+    // h_c = (ld*)malloc(sizeof(ld) * n * m);
+    handleCudaError(cudaHostAlloc(&h_c, sizeof(ld) * n * m,cudaHostAllocDefault));
     // int size = sizeof(ld) * n * m;
     // cerr << "before outputmatrixasync" << endl;
 
     int size = sizeof(ld) * n * m;
+    handleCudaError(cudaStreamSynchronize(mainstream));
     // cudaStream_t stream;
     // cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking);
     // cudaStreamCreate(&stream);
@@ -491,8 +350,8 @@ int main()
 
     handleCudaError(cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost), "memcpy back");
     // printf("h_c=%p\n", h_c);
-    // outputMatrix(h_c, n, m);
-    outputMatrixAsync(h_c, d_c, n, m);
+    outputMatrix(h_c, n, m);
+    // outputMatrixAsync(h_c, d_c, n, m);
     output::flush();
     
     return 0;

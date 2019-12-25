@@ -42,3 +42,4 @@ cudakbio1
 cudakbio2
 asyncwithkbio0
 cudakbio3
+asyncio30
