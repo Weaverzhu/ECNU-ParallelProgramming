@@ -1,0 +1,75 @@
+
+\begin{frame}
+    \frametitle{solving matrix mult on CUDA}
+
+    \begin{itemize}
+        \item host vs device, distributed memory
+        \item streamprocessors
+        \item blocks, wraps, threads, shared memory
+    \end{itemize}
+
+    子任务：给定 $i,j$, 计算 $C_{ij}$，也就是并行最外面的两个for
+\end{frame}
+
+\begin{frame}
+    \frametitle{solving matrix mult on CUDA}
+
+    \begin{itemize}
+        \item 轻量级线程，切换成本较低
+        \item 基本可以平等划分任务
+        \item 一个线程对应一个子任务（开 $n \times m$ 个线程）
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{shared memory}
+    \begin{itemize}
+        \item 公式: $C_{ij} = \sum\limits_{k=0}^{bm} A_{ik} \cdot B_{kj}$
+        \item 对于内层的两个循环$j,k$，发现公用 $A_{ix}$
+        \item 使用 share memory 缓存 $A$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{share memory}
+    \begin{itemize}
+        \item block内公用
+        \item \texttt{block\_size} 必须是 $am$ 的因子，保证同块内使用相同的一行
+        \item 别忘了 \texttt{\_\_sychronize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Fast IO: buffered input \& output}
+    \begin{itemize}
+        \item \texttt{fread, fwrite instead of printf, scanf}
+        \item no need to flush every time we read/write a number
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Occupancy: optimal size for the number of blocks and threads}
+    \begin{itemize}
+        \item 以 wrap 为计算单元
+        \item thread 中有register
+        \item block 中有share memory
+        \item 每个 multiprocessor 也有最大的 register 和 share memory 和  active threads
+        \item 如果资源不够将无法派出所有的资源进行运算
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Occupancy: optimal size for the number of blocks and threads}
+    \begin{itemize}
+        \item 我们需要让最大比例的显卡工作
+        \item 引入 Occupancy 机制
+        \item 通过 nvidia 官网上的 Occupancy calculator 进行运算
+        \item \texttt{nvcc --ptxas-options=-v to nvcc} 查看内核函数使用寄存器个数
+        \item 使用 \texttt{}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{asychronize IO}
+\end{frame}
