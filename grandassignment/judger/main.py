@@ -10,11 +10,11 @@ brutalforcesource = ".\\baoli\\main.cpp"
 
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
+mpirun = "./mpi.sh"
+brutallinux = "./bf.sh"
 
 msize = [30, 41]
 ele_range = [-1222220,1220220]
-
-# gendata = True;
 gendata = True
 
 def randomfloat(l, r):
@@ -107,37 +107,43 @@ class matrixcmp:
 
         pass
         
-# n = randint(msize[0], msize[1])
-# m = randint(msize[0], msize[1])
-# k = randint(msize[0], msize[1])
+n = randint(msize[0], msize[1])
+m = randint(msize[0], msize[1])
+k = randint(msize[0], msize[1])
+# n = 1
+# m = 5000
+# k = 1
 
-n = 1
-m = 5000
-k = 1
+cuda = Runner(".\\cuda\\cuda.cu", "cuda", cudarun)
+brutalforce = Runner(".\\baoli\\main.cpp", "bf", brutalforcerun)
+brutalforcelinux = Runner("./baoli/main.cpp", "main", brutalforcelinux)
+cudakbio = Runner(".\\cuda\\cudakbio.cu", "cudakbio", cudarun)
+mpi = Runner("./mpi/mpi.cpp", "mpi", mpirun)
 
-cuda = Runner(cudasource, "cuda", cudarun)
-brutalforce = Runner(brutalforcesource, "bf", brutalforcerun)
+def runtest(gendata = True, main = cuda, std = brutalforce, ele_range = [0, 1000000]):
+    if gendata:
+        f = open(outputFile, "w")
+        f.write(randomMatrixStr(n, m, ele_range[0], ele_range[1]))
+        f.write(randomMatrixStr(m, k, ele_range[0], ele_range[1]))
+        f.close()
+    
+    main.go()
+    
+    if gendata:
+        std.go()
+        f1 = open(cuda.outputfile, "r")
+        f2 = open(brutalforce.outputfile, "r")
 
-if gendata:
-    f = open(outputFile, "w")
-    f.write(randomMatrixStr(n, m, ele_range[0], ele_range[1]))
-    f.write(randomMatrixStr(m, k, ele_range[0], ele_range[1]))
-    f.close()
+        mainAns = matrixcmp(f1.read())
+        bfAns = matrixcmp(f2.read())
+        res = mainAns.diff(bfAns)
+        f1.close()
+        f2.close()
 
-cuda.go()
+def cudatest():
+    runtest(gendata, cuda, brutalforce, ele_range)
 
-if gendata:
-    brutalforce.go()
+def mpitest():
+    runtest(gendata, mpi, brutalforcelinux, ele_range)
 
-    # cuda.diff(brutalforce)
-    f1 = open(cuda.outputfile, "r")
-    f2 = open(brutalforce.outputfile, "r")
-
-    cudaAns = matrixcmp(f1.read())
-    bfAns = matrixcmp(f2.read())
-
-    res = cudaAns.diff(bfAns)
-
-    f1.close()
-    f2.close()
 

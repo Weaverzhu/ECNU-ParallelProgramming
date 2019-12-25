@@ -1,1 +1,3 @@
-mpicc $1 -std=c99 -O3
+set -o errexit
+mpic++ $1 -O3
+time ./a.out

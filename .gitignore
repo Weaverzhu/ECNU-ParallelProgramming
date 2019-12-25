@@ -9,6 +9,7 @@ NOTE.md
 \test
 output.txt
 input*.txt
+*config*
 # Prerequisites
 *.d
 port
