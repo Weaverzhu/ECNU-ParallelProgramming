@@ -172,6 +172,9 @@ struct ios {
 
 int main() {
     iokb.init(stdin, stdout);
+
+
+
     output::flush();
     return 0;
 }

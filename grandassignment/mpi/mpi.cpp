@@ -1,22 +1,15 @@
-#include <cmath>
+#include <iostream>
 #include <cstdio>
 #include <cstring>
-#include <string>
-#include <algorithm>
-#include <iostream>
+#include <cstdlib>
+#include <cmath>
 
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-// #include <device_functions.h>
-#include <cuda_runtime_api.h>
+#include <mpi.h>
 
 using namespace std;
 
 typedef double ld;
 typedef long long LL;
-
-const int max_shared_size = 128;
 
 namespace io_impl
 {
@@ -177,104 +170,45 @@ struct ios {
         return *this;
     }
 } io;
+// ============================== fastio ======================
 
-inline void handleCudaError(cudaError_t err, string name = "fuck") {
-    if (err != cudaSuccess) {
-        cerr << name << endl;
-        cerr << cudaGetErrorString(err) << endl;
-        exit(0);
-    }
-}
+int world_size, world_rank;
 
-ld *d_a, *d_b, *d_c, *h_a, *h_b, *h_c;
-int an, am, bn, bm;
-int n, m;
+int a[100], n;
 
-void copyMatrix(ld *&src,  ld *&dst, int n, int m) {
-    int size = sizeof(ld) * n * m;
-    
-    handleCudaError(cudaMalloc(&dst, size), "cudaMalloc in copyMatrix");
-    handleCudaError(cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice), "memcpy in copyMatrix");
-
-}
-
-template<typename T>
-__global__ void matrixMult(T *d_a, T *d_b, T *d_c, int an, int bm, int am) {
-    int index = blockDim.x * blockIdx.x + threadIdx.x;
-    int i = index / bm, j = index % bm;
-    if (i >= an || j >= bm) return;
-    ld sum = 0;
-    if (i < an && j < bm) {
-        for (int k=0; k<am; ++k)
-            sum += d_a[i * am + k] * d_b[k * bm + j];
-    }
-    if (i * bm + j < an * bm)
-        d_c[i * bm + j] = sum;
-    // int index = threadIdx.x;
-    // if (index < an * bm)
-    //     d_c[index] = 1; 
-}
-
-void outputMatrix(ld *a, int n, int m) {
-    // output::print(n); output::print(',');
-    // output::print(m); output::print('\n');
-    for (int i=0; i<n; ++i) {
-        int base = i * m;
-        output::print(a[base]);
-        for (int j=1; j<m; ++j) {
-            output::print(',');
-            output::print(a[base + j]);
-        }
-        output::print('\n');
-    }
-}
-
-int main()
-{
-    // #ifndef Weaverzhu
-    // freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
-
+void input() {
     iokb.init(fopen("input.txt", "r"), fopen("output.txt", "w"));
-
-    cudaDeviceProp prop;
-    cudaGetDeviceProperties(&prop, 0);
-    cerr << prop.name << endl;
-    // #endif
-    io >> an >> am; h_a = (ld*)malloc(sizeof(ld) * an * am);
-    for (int i=0; i<an; ++i)
-    for (int j=0; j<am; ++j)
-        io >> h_a[i*am + j];
-
-    io >> bn >> bm; h_b = (ld*)malloc(sizeof(ld) * bn * bm);
-    for (int i=0; i<bn; ++i)
-    for (int j=0; j<bm; ++j)
-        io >> h_b[i*bm + j];
-    // B.readtrans();
-
-    // outputMatrix(h_a, an, am);
-    // outputMatrix(h_b, bn, bm);
-
+    // freopen("output.txt", "w", stdout);
+    int chunk_size;
     
-    n = an;
-    m = bm;
-    int block_size = prop.maxThreadsPerBlock, grids = (n * m + block_size - 1) / block_size;
-    copyMatrix(h_a, d_a, an, am);
-    copyMatrix(h_b, d_b, bn, bm);
-    handleCudaError(cudaMalloc(&d_c, sizeof(ld) * n * m), "allocate for h_c");
+    memset(a, 0, sizeof a);
 
-    matrixMult<<<grids, block_size>>>(d_a, d_b, d_c, an, bm, am);
-    h_c = (ld*)malloc(sizeof(ld) * n * m);
-    int size = sizeof(ld) * n * m;
+    if (world_rank == 0) {
+        io >> n;
+        for (int i=0; i<n; ++i) 
+            io >> a[i];
+        chunk_size = (n + world_size - 1) / world_size;
+        
+    }
+    MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    // MPI_Scatter(a, chunk_size, MPI_INT, a, chunk_size, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(a, n, MPI_INT, 0, MPI_COMM_WORLD);
+}
 
-
-    handleCudaError(cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost), "memcpy back");
+int main(int argc, char **argv) {
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    // ===========================
     
-    outputMatrix(h_c, n, m);
-    output::flush();
-    
+    input();
+    printf("In process %d, n=%d\n", world_rank, n);
+    for (int i=0; i<n; ++i) {
+        printf("%d ", a[i]);
+    }
+    printf("\n");
+
+    // ===========================
+    MPI_Finalize();
     return 0;
 }
-
-
-

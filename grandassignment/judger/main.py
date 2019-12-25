@@ -5,8 +5,7 @@ import time
 
 # ============= config =================
 outputFile = ".\\input.txt"
-cudasource = ".\\cuda\\cudakbio.cu"
-brutalforcesource = ".\\baoli\\main.cpp"
+inputFileLinux = "./input.txt"
 
 cudarun = ".\\cuda.bat"
 brutalforcerun = ".\\bf.bat"
@@ -42,11 +41,26 @@ def randomMatrixStr(n, m, L=0, R=1000000):
     return res
 
 class Runner:
-    def __init__(self, sourcepath, name, runner):
+    tmpinputfile = [
+        ".\\input.txt",
+        "./input.txt"
+    ]
+
+    tmpoutputfile = [
+        ".\\output.txt",
+        "./output.txt"
+    ]
+
+
+    def __init__(self, sourcepath, name, runner, isInLinux = 0):
         self.sourcepath = sourcepath
         self.name = name
         self.runner = runner
-        self.outputfile = ".\\judger\\" + self.name + ".txt"
+        prefix = ".\\judger\\"
+        self.isLinux = isInLinux
+        if isInLinux == 1:
+            prefix = "./judger/"
+        self.outputfile = prefix + self.name + ".txt"
 
     def go(self):
         print("log: start to run {}".format(self.runner))
@@ -56,7 +70,7 @@ class Runner:
         if ret != 0:
             print("err: running {} failed".format(self.name))
         
-        ret = os.system("xcopy /y .\\output.txt {}".format(self.outputfile))
+        ret = os.system("xcopy /y {} {}".format(Runner.tmpoutputfile[self.isLinux], self.outputfile))
         
         if ret != 0:
             print("err: copying the output of {} failed".format(self.name))
@@ -116,13 +130,18 @@ k = randint(msize[0], msize[1])
 
 cuda = Runner(".\\cuda\\cuda.cu", "cuda", cudarun)
 brutalforce = Runner(".\\baoli\\main.cpp", "bf", brutalforcerun)
-brutalforcelinux = Runner("./baoli/main.cpp", "main", brutalforcelinux)
+brutalforcelinux = Runner("./baoli/main.cpp", "main", brutallinux)
 cudakbio = Runner(".\\cuda\\cudakbio.cu", "cudakbio", cudarun)
 mpi = Runner("./mpi/mpi.cpp", "mpi", mpirun)
 
-def runtest(gendata = True, main = cuda, std = brutalforce, ele_range = [0, 1000000]):
+def runtest(gendata = True, main = cuda, std = brutalforce, ele_range = [0, 1000000], isInLinux = False):
     if gendata:
-        f = open(outputFile, "w")
+        inputfile = outputFile
+        if (isInLinux):
+            inputfile = inputFileLinux
+
+            
+        f = open(inputfile, "w")
         f.write(randomMatrixStr(n, m, ele_range[0], ele_range[1]))
         f.write(randomMatrixStr(m, k, ele_range[0], ele_range[1]))
         f.close()
@@ -130,6 +149,7 @@ def runtest(gendata = True, main = cuda, std = brutalforce, ele_range = [0, 1000
     main.go()
     
     if gendata:
+        
         std.go()
         f1 = open(cuda.outputfile, "r")
         f2 = open(brutalforce.outputfile, "r")
@@ -147,3 +167,4 @@ def mpitest():
     runtest(gendata, mpi, brutalforcelinux, ele_range)
 
 
+mpitest();

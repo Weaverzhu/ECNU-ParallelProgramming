@@ -16,8 +16,6 @@ using namespace std;
 typedef double ld;
 typedef long long LL;
 
-const int max_shared_size = 128;
-
 namespace io_impl
 {
 inline bool maybe_digit(char c)

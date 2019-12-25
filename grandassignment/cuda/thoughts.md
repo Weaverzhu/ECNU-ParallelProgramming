@@ -12,4 +12,10 @@
 
 把浮点数拆开来当整数部分，快了一倍。。。。（老师明确说整数行不通的，看起来数据假了
 
-查看 occupancy，查到古董卡 tesla c2075 的计算能力
+查看 occupancy，查到古董卡 tesla c2075 的计算能力，https://developer.nvidia.com/cuda-gpus
+
+Determining Registers Per Thread and Shared Memory Per Thread Block
+To determine the number of registers used per thread in your kernel, simply compile the kernel code using the option               --ptxas-options=-v to nvcc.  This will output information about register, local memory, shared memory, and constant memory usage for each kernel in the .cu file.  However, if your kernel declares any external shared memory that is allocated dynamically, you will need to add the (statically allocated) shared memory reported by ptxas to the amount you dynamically allocate at run time to get the correct shared memory usage.  An example of the verbose ptxas output is as follows:
+
+
+Linux-Ubuntu open-mpi运行错误:https://www.jianshu.com/p/fe9649f9596e cma-permission-denied
