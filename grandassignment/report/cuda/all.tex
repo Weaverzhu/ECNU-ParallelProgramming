@@ -89,8 +89,10 @@
 \begin{frame}
     \frametitle{asychronize IO: input}
     \begin{itemize}
-        \item \texttt{cudaStream_t}
+        \item \texttt{cudaStream\_t}
         \item \texttt{cudaHostAlloc} instead of \texttt{malloc}
         \item \texttt{cudaMemcpyAsync} instead of \texttt{cudaMemcpy}
     \end{itemize}
 \end{frame}
+
+\input{cuda/code.tex}
