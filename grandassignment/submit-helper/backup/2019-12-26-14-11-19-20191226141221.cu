@@ -304,8 +304,8 @@ int main()
     m = bm;
     int block_size = min(am, prop.maxThreadsPerBlock);
 
-    // int numBlocks = 2 * prop.multiProcessorCount;
-    // cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocks, matrixMult2, block_size, 0);
+    int numBlocks = 2 * prop.multiProcessorCount;
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocks, matrixMult2, block_size, 0);
     // double activeWarps = numBlocks * block_size / prop.warpSize,
     // maxWarps = prop.maxThreadsPerMultiProcessor / prop.warpSize;
     // cerr << "occupancy = " << activeWarps / maxWarps * 100 << "% " << endl;
