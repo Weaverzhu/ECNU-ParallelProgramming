@@ -69,7 +69,28 @@
     \end{itemize}
 \end{frame}
 
+\begin{frame}
+    \frametitle{Bottleneck: IO}
+    \begin{itemize}
+        \item GPU 计算矩阵瓶颈在于 IO
+        \item 输出浮点数也会带来计算
+    \end{itemize}
+\end{frame}
 
 \begin{frame}
-    \frametitle{asychronize IO}
+    \frametitle{Bottleneck: IO}
+    \begin{itemize}
+        \item 仿照 MPI 在 distributed memory 中使用异步 IO
+        \item Host 一边传入 Device 的数据一边输出到文件
+        \item Host 一边读入文件一遍 Copy 数据到 Device
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{asychronize IO: input}
+    \begin{itemize}
+        \item \texttt{cudaStream_t}
+        \item \texttt{cudaHostAlloc} instead of \texttt{malloc}
+        \item \texttt{cudaMemcpyAsync} instead of \texttt{cudaMemcpy}
+    \end{itemize}
 \end{frame}

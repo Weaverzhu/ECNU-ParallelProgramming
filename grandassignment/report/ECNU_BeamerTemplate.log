@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2019.11.27)  25 DEC 2019 23:33
+This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2019.11.27)  25 DEC 2019 23:49
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -1963,6 +1963,15 @@ File: ecnu_logo.png Graphic file (type bmp)
 <ecnu_logo.png>
  [9
 
+]
+File: ecnu_background.png Graphic file (type bmp)
+<ecnu_background.png>
+File: ecnu_title.png Graphic file (type bmp)
+<ecnu_title.png>
+File: ecnu_logo.png Graphic file (type bmp)
+<ecnu_logo.png>
+ [10
+
 ])
 \tf@nav=\write6
 \openout6 = `ECNU_BeamerTemplate.nav'.
@@ -1988,4 +1997,4 @@ Here is how much of TeX's memory you used:
  1348 hyphenation exceptions out of 8191
  53i,17n,74p,10475b,650s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on ECNU_BeamerTemplate.pdf (9 pages).
+Output written on ECNU_BeamerTemplate.pdf (10 pages).
