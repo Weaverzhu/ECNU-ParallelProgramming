@@ -226,8 +226,6 @@ __global__ void matrixMult2(ld *d_a, ld *d_b, ld *d_c, int an, int bm, int am, i
     if (index >= an * bm) return;
     int st = min(index, addi) * (workload+1) + max(0, index - addi) * workload, ed = st + workload + (index < addi ? 1 : 0);
     int shareda = min(am, max_shared_size);
-    // shareda = 2;
-    // shareda = 0;
 
     for (int p=st; p<ed; ++p) {
         int i = p / bm, j = p % bm;

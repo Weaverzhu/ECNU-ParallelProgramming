@@ -7,7 +7,13 @@
 \usepackage{amsmath,amsfonts,amssymb,bm}   %导入数学公式所需宏包
 \usepackage{color}			 %字体颜色支持
 \usepackage{graphicx,hyperref,url}	
+\usepackage{minted,fontspec}
 %%%%%%%%%%%%%%%%%%	
+
+\setmonofont{Source Code Pro}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\newminted{asm}{bgcolor=bg}
+\newminted{cpp}{bgcolor=bg}
 
 
 \beamertemplateballitem		%设置 Beamer 主题
@@ -52,6 +58,7 @@
 \tableofcontents
 \end{frame}				%生成提纲页
 
+
 \section{Introduction}
 \begin{frame}
   \frametitle{Backgrounds}
@@ -83,7 +90,7 @@
   \noindent\textbf{Bidirectional Language Model Loss\\}
    \[{\mathcal{L}_l} =  - \sum\limits_{i = 1}^S {\sum\limits_{j = 1}^N {\log (P({w_{j + 1}}|{f_j})) + \log (P({w_{j - 1}}|{b_j}))} }\]
 \end{frame}
-
+ 
 \section{References}
 \begin{frame}{References}
 \begin{thebibliography}{99}
@@ -95,5 +102,9 @@ In Proceedings of the 54th Annual Meeting of the Association for Computational L
 In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics, pages 2121–2130, Vancouver, Canada, July 30 - August 4, 2017.
 \end{thebibliography}
 \end{frame}
+
+\section{CUDA}
+
+\input{cuda/all.tex}
 
 \end{document}

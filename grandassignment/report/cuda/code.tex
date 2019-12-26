@@ -1,0 +1,133 @@
+% fastio
+\begin{frame}[fragile]
+    \frametitle{code: buffered input}
+    \begin{cppcode}
+    inline char next_char()
+    {
+        static char buf[100000], *p1 = buf,
+            *p2 = buf;
+        return p1 == p2 && (p2 = (p1 = buf)
+            + fread(buf, 1, 100000, fin), p1 == p2) 
+            ? EOF : *p1++;
+    }
+    \end{cppcode}
+\end{frame}
+
+
+\begin{frame}[fragile]
+    \frametitle{code: buffered output}
+    \begin{cppcode}
+    inline void flush() {
+        fwrite(buffer, 1, s-buffer, stdout);
+        s = buffer;
+        fflush(stdout);
+    }
+    inline void print(const char ch) {
+        // putchar(ch); return;
+        if (s-buffer>OutputBufferSize-2) flush();
+        *s++ = ch;
+    }
+    \end{cppcode}
+\end{frame}
+ 
+ 
+
+\begin{frame}[fragile]
+    \frametitle{code: share memory, block partition}
+    \begin{cppcode}
+    __shared__ ld c_a[max_shared_size];
+    int index = blockDim.x * blockIdx.x + threadIdx.x;
+    if (index >= an * bm) return;
+    int st = min(index, addi) * (workload+1) + 
+    max(0, index - addi) * workload, ed = 
+    st + workload + (index < addi ? 1 : 0);
+    int shareda = min(am, max_shared_size);
+    for (int p=st; p<ed; ++p) {
+        // ...
+    \end{cppcode}
+\end{frame} 
+
+\begin{frame}[fragile]
+    \frametitle{code: share memory, block partition}
+    \begin{cppcode}
+    for (int p=st; p<ed; ++p) {
+        int i = p / bm, j = p % bm;
+        if (p % bm == 0) {
+            
+            for (int j=0; j<shareda; ++j) {
+                c_a[j] = d_a[i * am + j];
+            }
+            __syncthreads();
+        }
+        ...
+    \end{cppcode}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{code: share memory, block partition}
+    \begin{cppcode}
+    for (int p=st; p<ed; ++p) {
+        int i = p / bm, j = p % bm;
+        if (p % bm == 0) {
+            
+            for (int j=0; j<shareda; ++j) {
+                c_a[j] = d_a[i * am + j];
+            }
+            __syncthreads();
+        }
+        ...
+    \end{cppcode}
+\end{frame}
+
+
+\begin{frame}[fragile]
+    \frametitle{code: async IO, creating streams}
+    \begin{cppcode}
+    int st = 0, ed = n * m;
+    // printf("st=%d ed=%d, a=%p\n", st, ed, a); 
+    cudaStream_t stream[2];
+    int mask = 0;
+    cudaStreamCreate(&stream[0]);
+    cudaStreamCreate(&stream[1]);
+    int size;
+    \end{cppcode}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{code: async IO, creating streams}
+    \begin{cppcode}
+    cudaStream_t mainstream;
+    cudaStreamCreate(&mainstream);
+    // ...
+    copyMatrixAsync(h_a, d_a, an, am, mainstream);
+    // ... read h_b
+    copyMatrixAsync(h_b, d_b, bn, bm, mainstream);
+    // ... 
+    matrixMult<<<grids, block_size, 0, mainstream>>>
+    (d_a, d_b, d_c, an, bm, am);
+    // ...
+    handleCudaError(cudaStreamSynchronize(mainstream));
+    // ...
+    outputMatrixAsync(h_c, d_c, n, m);
+    // pipeline: memcpy from device & output each rows 
+    \end{cppcode}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{code: async IO, pipelines}
+    \begin{cppcode}
+    for (; st<ed; st+=size, mask^=1) {
+        size = min(chunk_size, ed - st);
+        handleCudaError(cudaMemcpyAsync(a + st,
+         d_a + st, size * sizeof(ld), 
+         cudaMemcpyDeviceToHost, stream[mask]));
+        // exit(0);
+        if (st - chunk_size >= 0) {
+            // printf("%d %d\n",st-chunk_size, st);
+            handleCudaError(cudaStreamSynchronize(stream[mask^1]));
+            outputinterval(a, st-chunk_size, st);
+        }
+    }
+    \end{cppcode}
+\end{frame}
+
