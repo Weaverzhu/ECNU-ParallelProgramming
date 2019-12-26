@@ -178,7 +178,7 @@ struct ios {
 
 // ======================================================
 
-const int max_shared_size = 64;
+const int max_shared_size = 128;
 
 inline void handleCudaError(cudaError_t err, string name = "fuck") {
     if (err != cudaSuccess) {
@@ -231,7 +231,8 @@ __global__ void matrixMult2(ld *d_a, ld *d_b, ld *d_c, int an, int bm, int am, i
     int st2 = min(threadid, addi) * (workload + 1) + max(0, threadid - addi) * workload, ed2 = st2 + workload + (threadid < addi);
     for (int p=st; p<ed; ++p) {
         int i = p, base = i * am;
-        for (int j=0; j<shareda; ++j)
+        for (int j=st2; j<min(shareda, ed2); ++j)
+        // for (int j=0; j<shareda; ++j)
             c_a[j] = d_a[base + j];
     
         __syncthreads();
@@ -299,23 +300,21 @@ int main()
     // outputMatrix(h_a, an, am);
     // outputMatrix(h_b, bn, bm);
 
-    
+    fprintf(stderr, "stderr: %d %d %d %d\n", an, am, bn, bm);
     n = an;
     m = bm;
     int block_size = min(am, prop.maxThreadsPerBlock);
 
-    // int numBlocks = 2 * prop.multiProcessorCount;
+    // int numBlocks = 4 * prop.multiProcessorCount;
     // cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocks, matrixMult2, block_size, 0);
-    // double activeWarps = numBlocks * block_size / prop.warpSize,
-    // maxWarps = prop.maxThreadsPerMultiProcessor / prop.warpSize;
-    // cerr << "occupancy = " << activeWarps / maxWarps * 100 << "% " << endl;
-    // cerr << "numBlocks = " << numBlocks << "threads = "<< numBlocks * block_size <<endl;
-    // exit(0);
+    
     
     int grids = (an * am + block_size - 1) / block_size;
     grids = (grids + 1) / 2;
     grids = 2 * prop.multiProcessorCount;
+    // grids = numBlocks;
     // grids = 2;
+    // cuOccupancyMaxPotentialBlockSize(&grids, &block_size, matrixMult2, )
     cerr << "grids=" << grids << ", block_size=" << block_size << endl;
 
     copyMatrix(h_a, d_a, an, am);

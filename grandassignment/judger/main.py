@@ -12,10 +12,10 @@ brutalforcerun = ".\\bf.bat"
 mpirun = "./mpi.sh"
 brutallinux = "./bf.sh"
 
-msize = [30, 41]
-ele_range = [0,10]
-# gendata = True
-gendata = False
+msize = [50, 150]
+ele_range = [0,1000000]
+gendata = True
+# gendata = False
 
 def randomfloat(l, r):
     return random() * (r-l) + l
@@ -133,7 +133,7 @@ k = randint(msize[0], msize[1])
 # k = 1000
 
 cuda = Runner(".\\cuda\\cudaoptblock.cu", "cuda", cudarun)
-brutalforce = Runner(".\\baoli\\main2.cpp", "bf", brutalforcerun)
+brutalforce = Runner(".\\baoli\\main.cpp", "bf", brutalforcerun)
 brutalforcelinux = Runner("./baoli/main.cpp", "main", brutallinux)
 cudakbio = Runner(".\\cuda\\asyncio3.cu", "cudakbio", cudarun)
 mpi = Runner("./mpi/mpi.cpp", "mpi", mpirun)
