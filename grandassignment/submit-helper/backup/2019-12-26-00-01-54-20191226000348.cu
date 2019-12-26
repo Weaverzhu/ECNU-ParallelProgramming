@@ -152,28 +152,21 @@ namespace output {
         // printf("%.2f", x);
         // static int stk[70], tp;
         // tp = 0;
-        if (v < 1e18) {
-            if (fabs(v) < 0.005)
-            {
-                print('0');
-                return;
-            }
-            else
-            {
-                LL x = (LL)floor(v * 100 + 0.5);
-                if (x<0) print('-'), x=-x;
-                // cerr << "x=" << x << endl; exit(0);
-                print((LL)(x / 100));
-                print('.');
-                print((char)(x / 10 % 10 + '0'));
-                print((char)(x % 10 + '0'));
-            }
-        } else {
-            static char buf[30];
-            sprintf(buf, "%.2lf", v);
-            print(buf);
+        if (fabs(v) < 0.005)
+        {
+            print('0');
+            return;
         }
-        
+        else
+        {
+            LL x = (LL)floor(v * 100 + 0.5);
+            if (x<0) print('-'), x=-x;
+            // cerr << "x=" << x << endl; exit(0);
+            print((LL)(x / 100));
+            print('.');
+            print((char)(x / 10 % 10 + '0'));
+            print((char)(x % 10 + '0'));
+        }
     }
 }
 

@@ -5,9 +5,9 @@
 
 import requests, os, sys, time, shutil, getopt
 
-login_url = 'http://49.52.10.141:9002/login'
-presubmit_url = 'http://49.52.10.141:9002/preSubmit'
-submit_url = 'http://49.52.10.141:9002/submitCode'
+login_url = 'http://49.52.10.141:9003/login'
+presubmit_url = 'http://49.52.10.141:9003/preSubmit'
+submit_url = 'http://49.52.10.141:9003/submitCode'
 
 R = requests.Session() 
 
