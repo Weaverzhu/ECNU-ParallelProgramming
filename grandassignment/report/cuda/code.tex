@@ -1,0 +1,32 @@
+% fastio
+\begin{frame}[fragile]
+    \frametitle{code: buffered input}
+    \begin{cppcode}
+    inline char next_char()
+    {
+        static char buf[100000], *p1 = buf,
+            *p2 = buf;
+        return p1 == p2 && (p2 = (p1 = buf)
+            + fread(buf, 1, 100000, fin), p1 == p2) 
+            ? EOF : *p1++;
+    }
+    \end{cppcode}
+\end{frame}
+
+
+\begin{frame}[fragile]
+    \frametitle{code: buffered output}
+    \begin{cppcode}
+    inline void flush() {
+        fwrite(buffer, 1, s-buffer, stdout);
+        s = buffer;
+        fflush(stdout);
+    }
+    inline void print(const char ch) {
+        // putchar(ch); return;
+        if (s-buffer>OutputBufferSize-2) flush();
+        *s++ = ch;
+    }
+    \end{cppcode}
+\end{frame}
+
