@@ -135,7 +135,7 @@ k = randint(msize[0], msize[1])
 # m = 1
 # k = 33
 
-cuda = Runner(".\\cuda\\test.cu", "cuda", cudarun)
+cuda = Runner(".\\cuda\\tilewithoutcheat.cu", "cuda", cudarun)
 brutalforce = Runner(".\\baoli\\main.cpp", "bf", brutalforcerun)
 brutalforcelinux = Runner("./baoli/main.cpp", "main", brutallinux)
 cudakbio = Runner(".\\cuda\\asyncio3.cu", "cudakbio", cudarun)
